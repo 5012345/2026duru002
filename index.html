@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <!-- Viewport settings for mobile/tablet landscape optimization -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, landscape">
-    <title>수학 레이싱: 팀 대항전 V2</title>
+    <title>일차식 레이싱 대결</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&family=Orbitron:wght@500;800&display=swap" rel="stylesheet">
@@ -173,11 +173,11 @@
 
     <!-- 2. Login / Lobby Screen -->
     <div id="lobbyScreen" class="fixed inset-0 z-40 hidden flex-col items-center justify-center bg-[url('https://images.unsplash.com/photo-1547447134-cd3f5c716030?q=80&w=1964&auto=format&fit=crop')] bg-cover bg-center">
-        <div class="absolute inset-0 bg-slate-900/80 backdrop-blur-md"></div>
+        <div class="absolute inset-0 bg-slate-900/85 backdrop-blur-sm"></div>
         
         <div class="z-10 bg-slate-800/90 p-8 rounded-2xl border border-slate-600 shadow-2xl max-w-4xl w-full flex flex-col">
             <div class="flex justify-between items-center mb-6">
-                <h1 class="text-4xl race-font font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400 tracking-wider">MATH RACING V2</h1>
+                <h1 class="text-4xl race-font font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400 tracking-wider">일차식 레이싱 대결</h1>
                 <button onclick="toggleAdminLogin()" class="text-xs text-slate-500 hover:text-white"><i class="fa-solid fa-user-shield"></i> ADMIN</button>
             </div>
 
@@ -193,17 +193,17 @@
                     <!-- Unique Vehicle Selections -->
                     <button onclick="selectTeam(1)" id="teamBtn1" class="team-sel-btn flex flex-col items-center justify-center p-4 rounded-xl border-2 border-slate-600 hover:bg-slate-700 opacity-50 transition-all">
                         <i class="fa-solid fa-fighter-jet fa-rotate-90 text-4xl text-red-500 mb-3"></i>
-                        <span class="font-bold text-xs text-slate-300">이그니션 스피드스터</span>
+                        <span class="font-bold text-xs text-slate-300">스피드스터</span>
                         <span class="mt-2 text-[10px] font-bold text-slate-400 bg-slate-800 px-2 py-1 rounded-full border border-slate-600" id="teamCount1">0 / 6 명</span>
                     </button>
                     <button onclick="selectTeam(2)" id="teamBtn2" class="team-sel-btn flex flex-col items-center justify-center p-4 rounded-xl border-2 border-slate-600 hover:bg-slate-700 opacity-50 transition-all">
                         <i class="fa-solid fa-truck-monster text-4xl text-blue-500 mb-3"></i>
-                        <span class="font-bold text-xs text-slate-300">이지스 저거너트</span>
+                        <span class="font-bold text-xs text-slate-300">저거너트</span>
                         <span class="mt-2 text-[10px] font-bold text-slate-400 bg-slate-800 px-2 py-1 rounded-full border border-slate-600" id="teamCount2">0 / 6 명</span>
                     </button>
                     <button onclick="selectTeam(3)" id="teamBtn3" class="team-sel-btn flex flex-col items-center justify-center p-4 rounded-xl border-2 border-slate-600 hover:bg-slate-700 opacity-50 transition-all">
                         <i class="fa-solid fa-space-shuttle fa-rotate-90 text-4xl text-green-500 mb-3"></i>
-                        <span class="font-bold text-xs text-slate-300">제퍼 호버크래프트</span>
+                        <span class="font-bold text-xs text-slate-300">호버크래프트</span>
                         <span class="mt-2 text-[10px] font-bold text-slate-400 bg-slate-800 px-2 py-1 rounded-full border border-slate-600" id="teamCount3">0 / 6 명</span>
                     </button>
                     <button onclick="selectTeam(4)" id="teamBtn4" class="team-sel-btn flex flex-col items-center justify-center p-4 rounded-xl border-2 border-slate-600 hover:bg-slate-700 opacity-50 transition-all">
@@ -213,7 +213,7 @@
                     </button>
                     <button onclick="selectTeam(5)" id="teamBtn5" class="team-sel-btn flex flex-col items-center justify-center p-4 rounded-xl border-2 border-slate-600 hover:bg-slate-700 opacity-50 transition-all">
                         <i class="fa-solid fa-rocket fa-rotate-90 text-4xl text-purple-500 mb-3"></i>
-                        <span class="font-bold text-xs text-slate-300">보이드 인터셉터</span>
+                        <span class="font-bold text-xs text-slate-300">인터셉터</span>
                         <span class="mt-2 text-[10px] font-bold text-slate-400 bg-slate-800 px-2 py-1 rounded-full border border-slate-600" id="teamCount5">0 / 6 명</span>
                     </button>
                 </div>
@@ -242,14 +242,14 @@
     <!-- 3. Admin Panel Screen -->
     <div id="adminScreen" class="fixed inset-0 z-30 hidden bg-slate-900 p-6 flex-col">
         <div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-700">
-            <h1 class="text-3xl race-font font-black text-yellow-500"><i class="fa-solid fa-sliders"></i> RACE CONTROL PANEL</h1>
+            <h1 class="text-3xl race-font font-black text-yellow-500"><i class="fa-solid fa-sliders"></i> 관리자 화면</h1>
             <div class="flex gap-4">
                 <button onclick="resetGame()" class="bg-red-600 hover:bg-red-500 px-6 py-2 rounded font-bold transition-colors">RESET RACE</button>
                 <button onclick="startGame()" id="adminStartBtn" class="bg-green-600 hover:bg-green-500 px-8 py-2 rounded font-bold transition-colors shadow-[0_0_15px_rgba(22,163,74,0.5)]">START RACE</button>
             </div>
         </div>
 
-        <!-- Admin Race Track View (New) -->
+        <!-- Admin Race Track View -->
         <div class="w-full bg-slate-800 rounded-xl p-4 border border-slate-700 mb-6 relative h-48 overflow-hidden px-10">
             <h3 class="text-xs text-slate-400 font-bold mb-2 absolute top-2 left-4">LIVE TRACK MONITOR</h3>
             <div class="relative w-full h-full flex flex-col justify-evenly mt-3">
@@ -520,40 +520,23 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, updateDoc, onSnapshot, increment, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, updateDoc, onSnapshot, increment, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // ==========================================
-        // ⚠️ [GITHUB 배포 시 주의사항]
+        // 🛠️ Firebase 설정 (선생님의 프로젝트 정보)
         // ==========================================
-        // 깃허브에서 이 게임을 학생들과 멀티플레이로 진행하려면 
-        // 본인의 Firebase 프로젝트를 생성하고 아래 firebaseConfig 객체를 교체해야 합니다.
-        // ==========================================
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+        const firebaseConfig = {
+          apiKey: "AIzaSyBTqSuwHQT8sTvGhCRWJ9FXSFxxqMzxdRU",
+          authDomain: "duru01001-6dc7d.firebaseapp.com",
+          projectId: "duru01001-6dc7d",
+          storageBucket: "duru01001-6dc7d.firebasestorage.app",
+          messagingSenderId: "531394254407",
+          appId: "1:531394254407:web:5e2ac7243b72d320b64362",
+          measurementId: "G-2TVY9896RP"
+        };
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyDMcRf_D4ajjJWxaHS98-fX-CWHJCBHDAk",
-  authDomain: "duru001-b5129.firebaseapp.com",
-  databaseURL: "https://duru001-b5129-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "duru001-b5129",
-  storageBucket: "duru001-b5129.firebasestorage.app",
-  messagingSenderId: "196539259225",
-  appId: "1:196539259225:web:74bc126eb12d6f1c481448",
-  measurementId: "G-J5ZNLLLQ3E"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'math-racing-team-v2';
-        try { if(typeof __firebase_config !== 'undefined') firebaseConfig = JSON.parse(__firebase_config); } catch (e) {}
-
+        const appId = 'math-racing-team-v2';
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
@@ -562,11 +545,10 @@ const analytics = getAnalytics(app);
         const GAME_DOC_PATH = `artifacts/${appId}/public/data/gameState/main`;
         const PLAYERS_COL_PATH = `artifacts/${appId}/public/data/players`;
         
-        let gameDocRef;
-        let myDocRef;
-
-        // Global State Variables
         let userId = null;
+        let myDocRef = null;
+        let gameDocRef = doc(db, GAME_DOC_PATH);
+
         let myData = { nickname: "", team: null, score: 0, solved: 0, isAdmin: false };
         let gameState = { status: 'waiting', distances: { "1":0, "2":0, "3":0, "4":0, "5":0 }, m40: null, m80: null };
         let playersMap = {}; 
@@ -615,49 +597,48 @@ const analytics = getAnalytics(app);
         }
 
         const teamColors = {
-            1: { bg: 'bg-red-500', text: 'text-red-500', name: '이그니션 스피드스터', icon: 'fa-fighter-jet' },
-            2: { bg: 'bg-blue-500', text: 'text-blue-500', name: '이지스 저거너트', icon: 'fa-truck-monster' },
-            3: { bg: 'bg-green-500', text: 'text-green-500', name: '제퍼 호버크래프트', icon: 'fa-space-shuttle' },
+            1: { bg: 'bg-red-500', text: 'text-red-500', name: '스피드스터', icon: 'fa-fighter-jet' },
+            2: { bg: 'bg-blue-500', text: 'text-blue-500', name: '저거너트', icon: 'fa-truck-monster' },
+            3: { bg: 'bg-green-500', text: 'text-green-500', name: '호버크래프트', icon: 'fa-space-shuttle' },
             4: { bg: 'bg-yellow-500', text: 'text-yellow-500', name: '솔라 버기', icon: 'fa-truck-pickup' },
-            5: { bg: 'bg-purple-500', text: 'text-purple-500', name: '보이드 인터셉터', icon: 'fa-rocket' }
+            5: { bg: 'bg-purple-500', text: 'text-purple-500', name: '인터셉터', icon: 'fa-rocket' }
         };
 
         async function initApp() {
             try {
-                // Rule 3: Auth Before Queries
-                const token = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-                if (token) await signInWithCustomToken(auth, token);
-                else await signInAnonymously(auth);
+                await signInAnonymously(auth);
+                
+                onAuthStateChanged(auth, async (user) => {
+                    if (!user) return;
+                    userId = user.uid;
+                    myDocRef = doc(db, PLAYERS_COL_PATH, userId);
 
-                if (!auth.currentUser) throw new Error("Auth failed");
-                userId = auth.currentUser.uid;
-                myDocRef = doc(db, PLAYERS_COL_PATH, userId);
-                gameDocRef = doc(db, GAME_DOC_PATH);
+                    // Initialize Game State
+                    await setDoc(gameDocRef, {
+                        status: 'waiting',
+                        distances: { "1":0, "2":0, "3":0, "4":0, "5":0 },
+                        m40: null, m80: null, winner: null
+                    }, { merge: true });
 
-                await setDoc(gameDocRef, {
-                    status: 'waiting',
-                    distances: { "1":0, "2":0, "3":0, "4":0, "5":0 },
-                    m40: null, m80: null, winner: null
-                }, { merge: true });
+                    // Snapshot queries
+                    onSnapshot(gameDocRef, (snap) => {
+                        if(snap.exists()) handleGameStateUpdate(snap.data());
+                    }, (e) => console.error(e));
 
-                // Rule 2: Simple Snapshot queries
-                onSnapshot(gameDocRef, (snap) => {
-                    if(snap.exists()) handleGameStateUpdate(snap.data());
-                }, (e) => console.error(e));
+                    onSnapshot(collection(db, PLAYERS_COL_PATH), (snap) => {
+                        playersMap = {};
+                        snap.forEach(d => { playersMap[d.id] = d.data(); });
+                        if(myData.isAdmin) updateAdminPlayerList();
+                        updateTeamCountsUI();
+                    }, (e) => console.error(e));
 
-                onSnapshot(collection(db, PLAYERS_COL_PATH), (snap) => {
-                    playersMap = {};
-                    snap.forEach(d => { playersMap[d.id] = d.data(); });
-                    if(myData.isAdmin) updateAdminPlayerList();
-                    updateTeamCountsUI();
-                }, (e) => console.error(e));
-
-                document.getElementById('loadingScreen').classList.add('hidden');
-                document.getElementById('lobbyScreen').classList.remove('hidden');
-                document.getElementById('lobbyScreen').classList.add('flex');
+                    document.getElementById('loadingScreen').classList.add('hidden');
+                    document.getElementById('lobbyScreen').classList.remove('hidden');
+                    document.getElementById('lobbyScreen').classList.add('flex');
+                });
 
             } catch (e) {
-                document.getElementById('loadingScreen').innerHTML = `<h2 class="text-red-500">INIT ERROR: ${e.message}</h2>`;
+                document.getElementById('loadingScreen').innerHTML = `<h2 class="text-red-500">INIT ERROR: ${e.code}</h2>`;
             }
         }
 
@@ -686,10 +667,8 @@ const analytics = getAnalytics(app);
                     countEl.innerText = `${teamCounts[i]} / 6 명`;
                     if(teamCounts[i] >= 6) {
                         countEl.classList.replace('text-slate-400', 'text-red-400');
-                        countEl.classList.replace('border-slate-600', 'border-red-500');
                     } else {
                         countEl.classList.replace('text-red-400', 'text-slate-400');
-                        countEl.classList.replace('border-red-500', 'border-slate-600');
                     }
                 }
             }
@@ -706,10 +685,10 @@ const analytics = getAnalytics(app);
                 const btn = document.getElementById(`teamBtn${i}`);
                 if(i === teamNum) {
                     btn.classList.remove('opacity-50', 'border-slate-600');
-                    btn.classList.add('opacity-100', 'border-white', 'bg-slate-700');
+                    btn.classList.add('opacity-100', 'border-white', 'bg-slate-700/50');
                 } else {
                     btn.classList.add('opacity-50', 'border-slate-600');
-                    btn.classList.remove('opacity-100', 'border-white', 'bg-slate-700');
+                    btn.classList.remove('opacity-100', 'border-white', 'bg-slate-700/50');
                 }
             }
         }
@@ -735,7 +714,7 @@ const analytics = getAnalytics(app);
             myData.isAdmin = false;
             
             try {
-                playBgm(); // 참가 시 음악 재생 시작
+                playBgm();
                 await setDoc(myDocRef, myData);
                 enterGameScreen();
             } catch(e) { console.error("Join error", e); }
@@ -753,7 +732,7 @@ const analytics = getAnalytics(app);
             myData.isAdmin = true;
             myData.nickname = "ADMIN";
             try {
-                playBgm(); // 관리자 접속 시 음악 재생 시작
+                playBgm();
                 await setDoc(myDocRef, myData);
                 document.getElementById('lobbyScreen').classList.add('hidden');
                 document.getElementById('adminScreen').classList.remove('hidden');
@@ -772,7 +751,6 @@ const analytics = getAnalytics(app);
             badge.innerText = tColor.name;
             badge.className = `mt-2 inline-block px-3 py-1 rounded border border-slate-600 text-sm font-bold ${tColor.text}`;
 
-            // 처음 입장 시 팝업 띄우기
             openRules();
         }
 
@@ -1125,7 +1103,7 @@ const analytics = getAnalytics(app);
         }
 
         // Init
-        window.addEventListener('load', initApp);
+        initApp();
 
     </script>
 </body>
