@@ -131,6 +131,30 @@
 </head>
 <body class="flex flex-col w-screen h-screen">
 
+    <!-- Game Rules Toggle Button -->
+    <button onclick="openRules()" id="rulesToggleBtn" class="fixed top-4 left-4 z-50 bg-slate-800/80 text-white p-3 rounded-full border border-slate-600 shadow-lg hover:bg-slate-700 transition-colors hidden font-bold text-sm">
+        <i class="fa-solid fa-book mr-2"></i>게임 규칙
+    </button>
+
+    <!-- Game Rules Modal -->
+    <div id="rulesModal" class="fixed inset-0 z-[60] bg-slate-900/90 backdrop-blur-md hidden flex-col items-center justify-center p-4">
+        <div class="bg-slate-800 border border-slate-600 rounded-xl p-6 max-w-2xl w-full shadow-2xl relative">
+            <button onclick="closeRules()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-2xl"></i></button>
+            <h2 class="text-2xl font-black text-white mb-4 border-b border-slate-700 pb-2">📜 게임 규칙 안내</h2>
+            <ul class="text-slate-300 space-y-4 font-medium text-lg list-none p-0 mt-4">
+                <li><span class="inline-block w-3 h-3 rounded-full bg-emerald-400 mr-2"></span><span class="text-emerald-400 font-bold">초급(초록)</span>: 항, 계수, 상수항 찾기 (정답 시 <span class="text-yellow-400 font-bold">+1칸</span>)</li>
+                <li><span class="inline-block w-3 h-3 rounded-full bg-yellow-400 mr-2"></span><span class="text-yellow-400 font-bold">중급(노랑)</span>: 정수 계수 단항식 계산 (정답 시 <span class="text-yellow-400 font-bold">+3칸</span>)</li>
+                <li><span class="inline-block w-3 h-3 rounded-full bg-red-400 mr-2"></span><span class="text-red-400 font-bold">고급(빨강)</span>: 분수/소수 계수 일차식 계산 (정답 시 <span class="text-yellow-400 font-bold">+6칸</span>)</li>
+                <li class="mt-4 text-base text-slate-400 border-t border-slate-700 pt-4">- 가장 먼저 <span class="text-yellow-400 font-bold">120칸</span>을 돌파하는 팀이 우승합니다.</li>
+                <li class="text-base text-slate-400">- <span class="text-yellow-500 font-bold">40칸 도달 이벤트</span>: 숫자 순서대로 누르기 해킹 방어 미니게임 발생 (실패 시 3초 정지)</li>
+                <li class="text-base text-slate-400">- <span class="text-red-500 font-bold">80칸 도달 이벤트</span>: 가장 먼저 도달한 팀에게 엔진 출력 저하 페널티 (이후 전진 칸수 감소)</li>
+            </ul>
+            <div class="mt-8 text-center">
+                <button onclick="closeRules()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-8 rounded-lg transition-colors">확인</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Background Music -->
     <audio id="racingBgm" loop>
         <source src="https://assets.mixkit.co/music/preview/mixkit-cyberpunk-racing-134.mp3" type="audio/mpeg">
@@ -225,6 +249,24 @@
             </div>
         </div>
 
+        <!-- Admin Race Track View (New) -->
+        <div class="w-full bg-slate-800 rounded-xl p-4 border border-slate-700 mb-6 relative h-48 overflow-hidden px-10">
+            <h3 class="text-xs text-slate-400 font-bold mb-2 absolute top-2 left-4">LIVE TRACK MONITOR</h3>
+            <div class="relative w-full h-full flex flex-col justify-evenly mt-3">
+                <div class="absolute left-0 right-0 top-0 bottom-0 pointer-events-none z-0">
+                    <div class="absolute left-0 top-0 bottom-0 w-[2px] bg-white/20"></div>
+                    <div class="absolute left-[33.33%] top-0 bottom-0 w-[2px] bg-yellow-500/80"></div>
+                    <div class="absolute left-[66.66%] top-0 bottom-0 w-[2px] bg-red-500/80"></div>
+                    <div class="absolute left-[100%] top-0 bottom-0 w-2 border-l-2 border-yellow-400 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCI+PHJlY3Qgd2lkdGg9IjEwIiBoZWlnaHQ9IjEwIiBmaWxsPSJ3aGl0ZSIvPjxyZWN0IHg9IjEwIiB5PSIxMCIgd2lkdGg9IjEwIiBoZWlnaHQ9IjEwIiBmaWxsPSJ3aGl0ZSIvPjwvc3ZnPg==')]"></div>
+                </div>
+                <div class="track-lane h-5 relative flex items-center w-full z-10"><i id="admin-car1" class="fa-solid fa-fighter-jet fa-rotate-90 text-lg text-red-500 car-icon absolute top-1/2" style="left: 0%;"></i></div>
+                <div class="track-lane h-5 relative flex items-center w-full z-10"><i id="admin-car2" class="fa-solid fa-truck-monster text-lg text-blue-500 car-icon absolute top-1/2" style="left: 0%;"></i></div>
+                <div class="track-lane h-5 relative flex items-center w-full z-10"><i id="admin-car3" class="fa-solid fa-space-shuttle fa-rotate-90 text-lg text-green-500 car-icon absolute top-1/2" style="left: 0%;"></i></div>
+                <div class="track-lane h-5 relative flex items-center w-full z-10"><i id="admin-car4" class="fa-solid fa-truck-pickup text-lg text-yellow-500 car-icon absolute top-1/2" style="left: 0%;"></i></div>
+                <div class="track-lane h-5 relative flex items-center w-full z-10"><i id="admin-car5" class="fa-solid fa-rocket fa-rotate-90 text-lg text-purple-500 car-icon absolute top-1/2" style="left: 0%;"></i></div>
+            </div>
+        </div>
+
         <div class="flex-1 grid grid-cols-2 gap-8 overflow-hidden">
             <div class="bg-slate-800 rounded-xl p-6 flex flex-col">
                 <h2 class="text-xl text-slate-400 font-bold mb-4">현재 게임 상태</h2>
@@ -259,44 +301,48 @@
     <div id="gameScreen" class="flex-1 flex flex-col hidden h-full bg-slate-900">
         
         <!-- TOP: Race Track Area (40% height) -->
-        <div class="h-[40%] bg-slate-800 relative shadow-[inset_0_-10px_20px_rgba(0,0,0,0.3)] border-b-4 border-slate-700 flex flex-col justify-evenly py-2 px-12">
+        <div class="h-[40%] bg-slate-800 relative shadow-[inset_0_-10px_20px_rgba(0,0,0,0.3)] border-b-4 border-slate-700 py-4 px-12">
             
-            <!-- Absolute Wrapper for accurately aligned milestones and finish line -->
-            <div class="absolute left-12 right-12 top-0 bottom-0 pointer-events-none z-0">
-                <!-- 40km Milestone (33.33% of 120km) -->
-                <div class="absolute left-[33.33%] top-0 bottom-0 w-[2px] bg-yellow-500/50 flex flex-col justify-end pb-1">
-                    <span class="text-[10px] text-yellow-500 font-bold -ml-3 mb-1">40km</span>
+            <!-- Track Guide Container (Ensures accurate 0-100% width) -->
+            <div class="relative w-full h-full flex flex-col justify-evenly">
+                <!-- Milestones (Background) -->
+                <div class="absolute left-0 right-0 top-0 bottom-0 pointer-events-none z-0">
+                    <div class="absolute left-0 top-0 bottom-0 w-[2px] bg-white/20"></div>
+                    <!-- 40km Milestone (33.33% of 120km) -->
+                    <div class="absolute left-[33.33%] top-0 bottom-0 w-[2px] bg-yellow-500/80 flex flex-col justify-end pb-1">
+                        <span class="text-[10px] text-yellow-500 font-bold -ml-3 mb-1 bg-slate-800/80 px-1 rounded">40km</span>
+                    </div>
+                    <!-- 80km Milestone (66.66% of 120km) -->
+                    <div class="absolute left-[66.66%] top-0 bottom-0 w-[2px] bg-red-500/80 flex flex-col justify-end pb-1">
+                        <span class="text-[10px] text-red-500 font-bold -ml-3 mb-1 bg-slate-800/80 px-1 rounded">80km</span>
+                    </div>
+                    <!-- 120km Goal Line (100%) -->
+                    <div class="absolute left-[100%] top-0 bottom-0 w-4 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCI+PHJlY3Qgd2lkdGg9IjEwIiBoZWlnaHQ9IjEwIiBmaWxsPSJ3aGl0ZSIvPjxyZWN0IHg9IjEwIiB5PSIxMCIgd2lkdGg9IjEwIiBoZWlnaHQ9IjEwIiBmaWxsPSJ3aGl0ZSIvPjwvc3ZnPg==')] border-l-2 border-yellow-400 flex flex-col justify-end pb-1">
+                        <span class="text-[10px] text-white font-bold ml-5 mb-1 whitespace-nowrap drop-shadow-md">FINISH</span>
+                    </div>
                 </div>
-                <!-- 80km Milestone (66.66% of 120km) -->
-                <div class="absolute left-[66.66%] top-0 bottom-0 w-[2px] bg-red-500/50 flex flex-col justify-end pb-1">
-                    <span class="text-[10px] text-red-500 font-bold -ml-3 mb-1">80km</span>
-                </div>
-                <!-- 120km Goal Line (100%) -->
-                <div class="absolute left-[100%] top-0 bottom-0 w-4 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCI+PHJlY3Qgd2lkdGg9IjEwIiBoZWlnaHQ9IjEwIiBmaWxsPSJ3aGl0ZSIvPjxyZWN0IHg9IjEwIiB5PSIxMCIgd2lkdGg9IjEwIiBoZWlnaHQ9IjEwIiBmaWxsPSJ3aGl0ZSIvPjwvc3ZnPg==')] border-l-2 border-yellow-400 flex flex-col justify-end pb-1">
-                    <span class="text-[10px] text-white font-bold ml-5 mb-1 whitespace-nowrap drop-shadow-md">FINISH</span>
-                </div>
-            </div>
 
-            <!-- Lanes 1-5 (w-full fills the 0-120 distance exactly) -->
-            <div class="track-lane h-8 relative flex items-center w-full rounded-r z-10">
-                <span class="absolute -left-6 text-xs font-bold text-slate-500 race-font">1</span>
-                <i id="car1" class="fa-solid fa-fighter-jet fa-rotate-90 text-2xl text-red-500 car-icon absolute top-1/2" style="left: 0%;"></i>
-            </div>
-            <div class="track-lane h-8 relative flex items-center w-full rounded-r z-10">
-                <span class="absolute -left-6 text-xs font-bold text-slate-500 race-font">2</span>
-                <i id="car2" class="fa-solid fa-truck-monster text-2xl text-blue-500 car-icon absolute top-1/2" style="left: 0%;"></i>
-            </div>
-            <div class="track-lane h-8 relative flex items-center w-full rounded-r z-10">
-                <span class="absolute -left-6 text-xs font-bold text-slate-500 race-font">3</span>
-                <i id="car3" class="fa-solid fa-space-shuttle fa-rotate-90 text-2xl text-green-500 car-icon absolute top-1/2" style="left: 0%;"></i>
-            </div>
-            <div class="track-lane h-8 relative flex items-center w-full rounded-r z-10">
-                <span class="absolute -left-6 text-xs font-bold text-slate-500 race-font">4</span>
-                <i id="car4" class="fa-solid fa-truck-pickup text-2xl text-yellow-500 car-icon absolute top-1/2" style="left: 0%;"></i>
-            </div>
-            <div class="track-lane h-8 relative flex items-center w-full rounded-r z-10">
-                <span class="absolute -left-6 text-xs font-bold text-slate-500 race-font">5</span>
-                <i id="car5" class="fa-solid fa-rocket fa-rotate-90 text-2xl text-purple-500 car-icon absolute top-1/2" style="left: 0%;"></i>
+                <!-- Lanes 1-5 -->
+                <div class="track-lane h-8 relative flex items-center w-full z-10">
+                    <span class="absolute -left-6 text-xs font-bold text-slate-500 race-font">1</span>
+                    <i id="car1" class="fa-solid fa-fighter-jet fa-rotate-90 text-2xl text-red-500 car-icon absolute top-1/2" style="left: 0%;"></i>
+                </div>
+                <div class="track-lane h-8 relative flex items-center w-full z-10">
+                    <span class="absolute -left-6 text-xs font-bold text-slate-500 race-font">2</span>
+                    <i id="car2" class="fa-solid fa-truck-monster text-2xl text-blue-500 car-icon absolute top-1/2" style="left: 0%;"></i>
+                </div>
+                <div class="track-lane h-8 relative flex items-center w-full z-10">
+                    <span class="absolute -left-6 text-xs font-bold text-slate-500 race-font">3</span>
+                    <i id="car3" class="fa-solid fa-space-shuttle fa-rotate-90 text-2xl text-green-500 car-icon absolute top-1/2" style="left: 0%;"></i>
+                </div>
+                <div class="track-lane h-8 relative flex items-center w-full z-10">
+                    <span class="absolute -left-6 text-xs font-bold text-slate-500 race-font">4</span>
+                    <i id="car4" class="fa-solid fa-truck-pickup text-2xl text-yellow-500 car-icon absolute top-1/2" style="left: 0%;"></i>
+                </div>
+                <div class="track-lane h-8 relative flex items-center w-full z-10">
+                    <span class="absolute -left-6 text-xs font-bold text-slate-500 race-font">5</span>
+                    <i id="car5" class="fa-solid fa-rocket fa-rotate-90 text-2xl text-purple-500 car-icon absolute top-1/2" style="left: 0%;"></i>
+                </div>
             </div>
         </div>
 
@@ -318,15 +364,6 @@
                     <p class="text-2xl font-black text-emerald-400 race-font" id="myScoreTxt">0</p>
                     <p class="text-xs text-slate-400 mt-2 mb-1">해결한 문제</p>
                     <p class="text-xl font-bold text-blue-400 race-font" id="mySolvedTxt">0</p>
-                </div>
-
-                <!-- AI Coach Button & Display -->
-                <div class="mt-4 bg-slate-800 p-3 rounded-lg border border-indigo-500 relative shadow-[0_0_10px_rgba(99,102,241,0.2)]">
-                    <p class="text-xs text-indigo-400 font-bold mb-2"><i class="fa-solid fa-robot"></i> AI 전술 코치</p>
-                    <p id="aiCoachMsg" class="text-xs text-slate-300 italic mb-3 leading-relaxed">"레이스를 준비하세요, 드라이버!"</p>
-                    <button onclick="askAICoach()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold py-2 rounded transition-colors" id="aiCoachBtn">
-                        <i class="fa-solid fa-bolt"></i> 코치에게 조언 구하기
-                    </button>
                 </div>
 
                 <!-- Event Status Info -->
@@ -448,12 +485,6 @@
             <i class="fa-solid fa-trophy text-7xl text-yellow-500 mb-4 drop-shadow-[0_0_20px_rgba(234,179,8,0.8)]"></i>
             <h1 class="text-6xl font-black text-white mb-2">WINNER : <span id="winTeamName" class="text-yellow-400">TEAM 1</span></h1>
             <p class="text-xl text-slate-300">우승을 축하합니다!</p>
-            
-            <!-- AI Victory Lore -->
-            <div class="mt-6 max-w-3xl mx-auto bg-indigo-900/40 border border-indigo-500 p-5 rounded-xl shadow-[0_0_20px_rgba(99,102,241,0.4)]">
-                <p class="text-sm text-indigo-300 font-bold mb-2"><i class="fa-solid fa-wand-magic-sparkles"></i> AI 레이스 기록관의 서사시</p>
-                <p id="aiVictoryLore" class="text-lg text-white italic leading-relaxed">위대한 우승의 기록을 우주망 서버에서 수신 중입니다...</p>
-            </div>
         </div>
 
         <div class="w-full max-w-4xl px-8 flex gap-8">
@@ -541,6 +572,17 @@
         let isSoundOn = true;
         const bgm = document.getElementById('racingBgm');
 
+        window.openRules = function() {
+            const r = document.getElementById('rulesModal');
+            r.classList.remove('hidden');
+            r.classList.add('flex');
+        };
+        window.closeRules = function() {
+            const r = document.getElementById('rulesModal');
+            r.classList.add('hidden');
+            r.classList.remove('flex');
+        };
+
         window.toggleSound = function() {
             isSoundOn = !isSoundOn;
             const icon = document.getElementById('soundIcon');
@@ -559,70 +601,6 @@
                 bgm.play().catch(e => console.log("Audio play prevented:", e));
             }
         }
-
-        // ==========================================
-        // Gemini API Functions
-        // ==========================================
-        async function generateGeminiText(prompt) {
-            const apiKey = ""; // Leave empty. Environment automatically provides API Key.
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
-            const payload = {
-                contents: [{ parts: [{ text: prompt }] }],
-            };
-
-            try {
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                const result = await response.json();
-                if (result.candidates && result.candidates[0].content?.parts[0]?.text) {
-                    return result.candidates[0].content.parts[0].text;
-                }
-            } catch (e) {
-                console.error("Gemini API Error:", e);
-            }
-            return null;
-        }
-
-        window.askAICoach = async function() {
-            if(gameState.status !== 'playing') return;
-
-            const btn = document.getElementById('aiCoachBtn');
-            const msgEl = document.getElementById('aiCoachMsg');
-            
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> 분석 중...';
-            btn.classList.add('opacity-50', 'cursor-not-allowed');
-
-            const teamName = teamColors[myData.team]?.name || "알 수 없는 팀";
-            const prompt = `너는 냉철하고 미래지향적인 사이버펑크 수학 레이싱 코치야. 현재 내 이름은 '${myData.nickname}'이고, '${teamName}' 소속이야. 내 점수는 ${myData.score}점이야. 일차식 수학 문제를 빨리 풀어서 레이싱에서 이길 수 있도록 아주 시크하고 강렬하게 1문장으로만 동기부여를 해줘.`;
-            
-            const aiResponse = await generateGeminiText(prompt);
-            msgEl.innerText = aiResponse ? `"${aiResponse}"` : "통신 방해가 발생했습니다. 다시 시도하십시오.";
-            
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fa-solid fa-bolt"></i> 코치에게 조언 구하기';
-            btn.classList.remove('opacity-50', 'cursor-not-allowed');
-        }
-
-        async function generateVictoryLore(winTeam, mvp) {
-            const loreEl = document.getElementById('aiVictoryLore');
-            const teamName = teamColors[winTeam]?.name || `TEAM ${winTeam}`;
-            const mvpName = mvp ? mvp.nickname : "신원 미상의 에이스";
-            const mvpScore = mvp ? mvp.score : 0;
-
-            const prompt = `너는 전 우주에 생중계되는 거대한 '수학 레이싱 대회'의 열광적인 스포츠 캐스터야. 방금 '${teamName}' 팀이 압도적인 속도로 최종 우승을 차지했어! 특히 팀의 MVP인 '${mvpName}' 선수가 뛰어난 두뇌로 ${mvpScore}점이라는 대기록을 세웠지. 이 역사적인 순간을 극적이고 과장된 톤으로 딱 2문장으로 작성해서 축하해줘.`;
-
-            const lore = await generateGeminiText(prompt);
-            if(lore) {
-                loreEl.innerText = `"${lore}"`;
-            } else {
-                loreEl.innerText = "영광스러운 우승의 순간이 우주 기록소에 영구히 저장되었습니다!";
-            }
-        }
-        // ==========================================
 
         const teamColors = {
             1: { bg: 'bg-red-500', text: 'text-red-500', name: '이그니션 스피드스터', icon: 'fa-fighter-jet' },
@@ -774,12 +752,16 @@
         function enterGameScreen() {
             document.getElementById('lobbyScreen').classList.add('hidden');
             document.getElementById('gameScreen').classList.remove('hidden');
+            document.getElementById('rulesToggleBtn').classList.remove('hidden');
             
             document.getElementById('myInfoName').innerText = myData.nickname;
             const tColor = teamColors[myData.team];
             const badge = document.getElementById('myInfoTeamBadge');
             badge.innerText = tColor.name;
             badge.className = `mt-2 inline-block px-3 py-1 rounded border border-slate-600 text-sm font-bold ${tColor.text}`;
+
+            // 처음 입장 시 팝업 띄우기
+            openRules();
         }
 
         window.startGame = async function() {
@@ -1050,11 +1032,17 @@
 
             // 차량 이동 애니메이션 업데이트 (120을 100%로 환산)
             for(let i=1; i<=5; i++) {
+                let d = data.distances[i] || 0;
+                let pct = Math.min(100, (d / 120) * 100);
+
                 const icon = document.getElementById(`car${i}`);
                 if(icon) {
-                    let d = data.distances[i] || 0;
-                    let pct = Math.min(100, (d / 120) * 100);
                     icon.style.left = `${pct}%`;
+                }
+
+                const adminIcon = document.getElementById(`admin-car${i}`);
+                if(adminIcon) {
+                    adminIcon.style.left = `${pct}%`;
                 }
             }
 
@@ -1122,9 +1110,6 @@
                 document.getElementById('brainName').innerText = brain.nickname;
                 document.getElementById('brainCount').innerText = brain.solved;
             }
-
-            // 경기 종료 후 AI 서사시 생성
-            generateVictoryLore(winTeam, mvp);
         }
 
         // Init
