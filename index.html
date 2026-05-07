@@ -157,7 +157,7 @@
 
     <!-- Background Music -->
     <audio id="racingBgm" loop>
-        <source src="https://assets.mixkit.co/music/preview/mixkit-cyberpunk-racing-134.mp3" type="audio/mpeg">
+        <source src="bgm.mp3" type="audio/mpeg">
     </audio>
 
     <!-- Sound Toggle Button -->
@@ -530,15 +530,15 @@
         // 본인의 Firebase 프로젝트를 생성하고 아래 firebaseConfig 객체를 교체해야 합니다.
         // ==========================================
         let firebaseConfig = {
-  apiKey: "AIzaSyDMcRf_D4ajjWXaHS98-fX-CWHJCBHDAk",
-  authDomain: "duru001-b5129.firebaseapp.com",
-  databaseURL: "https://duru001-b5129-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "duru001-b5129",
-  storageBucket: "duru001-b5129.firebasestorage.app",
-  messagingSenderId: "196539259225",
-  appId: "1:196539259225:web:74bc126eb12d6f1c481448",
-  measurementId: "G-J5ZNLLLQ3E"
-};
+            apiKey: "AIzaSyDMcRf_D4ajjWXaHS98-fX-CWHJCBHDAk",
+            authDomain: "duru001-b5129.firebaseapp.com",
+            databaseURL: "https://duru001-b5129-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "duru001-b5129",
+            storageBucket: "duru001-b5129.firebasestorage.app",
+            messagingSenderId: "196539259225",
+            appId: "1:196539259225:web:74bc126eb12d6f1c481448",
+            measurementId: "G-J5ZNLLLQ3E"
+        };
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'math-racing-team-v2';
         try { if(typeof __firebase_config !== 'undefined') firebaseConfig = JSON.parse(__firebase_config); } catch (e) {}
 
