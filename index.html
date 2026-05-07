@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <!-- Viewport settings for mobile/tablet landscape optimization -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, landscape">
+    <title>수학 레이싱: 팀 대항전 V2</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&family=Orbitron:wght@500;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #0f172a; /* slate-900 */
+            color: #f8fafc;
+            overflow: hidden;
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .race-font { font-family: 'Orbitron', sans-serif; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.1); }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.3); border-radius: 10px; }
+
+        .card-container {
+            perspective: 1000px;
+        }
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
+            transform-style: preserve-3d;
+        }
+        .card-container.flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 12px;
+        }
+        .card-back {
+            transform: rotateY(180deg);
+            background: #1e293b;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border: 2px solid #cbd5e1;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+            20%, 40%, 60%, 80% { transform: translateX(10px); }
+        }
+        .animate-shake { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both; }
+        
+        @keyframes pulse-red {
+            0%, 100% { box-shadow: inset 0 0 0px 0px rgba(239, 68, 68, 0); }
+            50% { box-shadow: inset 0 0 50px 10px rgba(239, 68, 68, 0.5); }
+        }
+        .penalty-screen { animation: pulse-red 1s infinite; }
+
+        /* Track Styles : Dynamically scaled to match 120 distance perfectly (10 distance per block = 8.333%) */
+        .track-lane {
+            background: repeating-linear-gradient(90deg, #334155 0%, #334155 4.166%, #1e293b 4.166%, #1e293b 8.333%);
+            border-bottom: 2px dashed #64748b;
+        }
+        
+        .car-icon {
+            transition: left 0.5s ease-out;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));
+            /* Ensure the icon center aligns exactly with the % position */
+            transform: translate(-50%, -50%); 
+        }
+
+        .key-btn {
+            background: linear-gradient(180deg, #334155 0%, #1e293b 100%);
+            border: 1px solid #475569;
+            border-bottom-width: 4px;
+            border-radius: 8px;
+            color: white;
+            font-size: 1.25rem;
+            font-weight: bold;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.1s;
+        }
+        .key-btn:active {
+            transform: translateY(3px);
+            border-bottom-width: 1px;
+            background: #1e293b;
+        }
+        .key-action { background: linear-gradient(180deg, #0ea5e9 0%, #0284c7 100%); border-color: #0369a1; }
+        .key-clear { background: linear-gradient(180deg, #ef4444 0%, #dc2626 100%); border-color: #b91c1c; }
+
+        .minigame-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+        }
+        .mg-btn {
+            background: #f59e0b;
+            color: #000;
+            font-weight: 900;
+            font-size: 1.5rem;
+            border-radius: 8px;
+            padding: 15px 0;
+            box-shadow: 0 4px 0 #b45309;
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+        .mg-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 0 0 #b45309;
+        }
+        .mg-hidden { opacity: 0; pointer-events: none; }
+    </style>
+</head>
+<body class="flex flex-col w-screen h-screen">
+
+    <!-- Background Music -->
+    <audio id="racingBgm" loop>
+        <source src="https://assets.mixkit.co/music/preview/mixkit-cyberpunk-racing-134.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- Sound Toggle Button -->
+    <button onclick="toggleSound()" id="soundToggleBtn" class="fixed top-4 right-4 z-50 bg-slate-800/80 text-white p-3 rounded-full border border-slate-600 shadow-lg hover:bg-slate-700 transition-colors">
+        <i class="fa-solid fa-volume-high" id="soundIcon"></i>
+    </button>
+
+    <!-- 1. Loading Screen -->
+    <div id="loadingScreen" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-900">
+        <i class="fa-solid fa-circle-notch fa-spin text-5xl text-blue-500 mb-4"></i>
+        <h2 class="race-font text-2xl tracking-widest text-slate-300">CONNECTING...</h2>
+    </div>
+
+    <!-- 2. Login / Lobby Screen -->
+    <div id="lobbyScreen" class="fixed inset-0 z-40 hidden flex-col items-center justify-center bg-[url('https://images.unsplash.com/photo-1547447134-cd3f5c716030?q=80&w=1964&auto=format&fit=crop')] bg-cover bg-center">
+        <div class="absolute inset-0 bg-slate-900/80 backdrop-blur-md"></div>
+        
+        <div class="z-10 bg-slate-800/90 p-8 rounded-2xl border border-slate-600 shadow-2xl max-w-4xl w-full flex flex-col">
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="text-4xl race-font font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400 tracking-wider">MATH RACING V2</h1>
+                <button onclick="toggleAdminLogin()" class="text-xs text-slate-500 hover:text-white"><i class="fa-solid fa-user-shield"></i> ADMIN</button>
+            </div>
+
+            <!-- Player Entry Mode -->
+            <div id="playerEntryMode">
+                <div class="mb-6 w-1/2 mx-auto">
+                    <label class="block text-slate-400 mb-2 font-bold text-center">참가자 이름 (닉네임)</label>
+                    <input type="text" id="nicknameInput" class="w-full bg-slate-950 border border-slate-600 rounded p-3 text-white text-lg text-center focus:outline-none focus:border-blue-500 transition-colors" placeholder="이름을 입력하세요" maxlength="10">
+                </div>
+
+                <label class="block text-slate-400 mb-2 font-bold text-center">차량 선택 (팀 결정)</label>
+                <div class="grid grid-cols-5 gap-3 mb-8">
+                    <!-- Unique Vehicle Selections -->
+                    <button onclick="selectTeam(1)" id="teamBtn1" class="team-sel-btn flex flex-col items-center justify-center p-4 rounded-xl border-2 border-slate-600 hover:bg-slate-700 opacity-50 transition-all">
+                        <i class="fa-solid fa-fighter-jet fa-rotate-90 text-4xl text-red-500 mb-3"></i>
+                        <span class="font-bold text-xs text-slate-300">이그니션 스피드스터</span>
+                        <span class="mt-2 text-[10px] font-bold text-slate-400 bg-slate-800 px-2 py-1 rounded-full border border-slate-600" id="teamCount1">0 / 6 명</span>
+                    </button>
+                    <button onclick="selectTeam(2)" id="teamBtn2" class="team-sel-btn flex flex-col items-center justify-center p-4 rounded-xl border-2 border-slate-600 hover:bg-slate-700 opacity-50 transition-all">
+                        <i class="fa-solid fa-truck-monster text-4xl text-blue-500 mb-3"></i>
+                        <span class="font-bold text-xs text-slate-300">이지스 저거너트</span>
+                        <span class="mt-2 text-[10px] font-bold text-slate-400 bg-slate-800 px-2 py-1 rounded-full border border-slate-600" id="teamCount2">0 / 6 명</span>
+                    </button>
+                    <button onclick="selectTeam(3)" id="teamBtn3" class="team-sel-btn flex flex-col items-center justify-center p-4 rounded-xl border-2 border-slate-600 hover:bg-slate-700 opacity-50 transition-all">
+                        <i class="fa-solid fa-space-shuttle fa-rotate-90 text-4xl text-green-500 mb-3"></i>
+                        <span class="font-bold text-xs text-slate-300">제퍼 호버크래프트</span>
+                        <span class="mt-2 text-[10px] font-bold text-slate-400 bg-slate-800 px-2 py-1 rounded-full border border-slate-600" id="teamCount3">0 / 6 명</span>
+                    </button>
+                    <button onclick="selectTeam(4)" id="teamBtn4" class="team-sel-btn flex flex-col items-center justify-center p-4 rounded-xl border-2 border-slate-600 hover:bg-slate-700 opacity-50 transition-all">
+                        <i class="fa-solid fa-truck-pickup text-4xl text-yellow-500 mb-3"></i>
+                        <span class="font-bold text-xs text-slate-300">솔라 버기</span>
+                        <span class="mt-2 text-[10px] font-bold text-slate-400 bg-slate-800 px-2 py-1 rounded-full border border-slate-600" id="teamCount4">0 / 6 명</span>
+                    </button>
+                    <button onclick="selectTeam(5)" id="teamBtn5" class="team-sel-btn flex flex-col items-center justify-center p-4 rounded-xl border-2 border-slate-600 hover:bg-slate-700 opacity-50 transition-all">
+                        <i class="fa-solid fa-rocket fa-rotate-90 text-4xl text-purple-500 mb-3"></i>
+                        <span class="font-bold text-xs text-slate-300">보이드 인터셉터</span>
+                        <span class="mt-2 text-[10px] font-bold text-slate-400 bg-slate-800 px-2 py-1 rounded-full border border-slate-600" id="teamCount5">0 / 6 명</span>
+                    </button>
+                </div>
+
+                <button onclick="joinGame()" class="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-bold text-xl p-4 rounded-xl shadow-[0_0_15px_rgba(59,130,246,0.5)] transition-all">
+                    경기장 입장 (JOIN)
+                </button>
+                <p id="joinErrorTxt" class="text-red-400 text-sm font-bold mt-3 text-center h-5"></p>
+            </div>
+
+            <!-- Admin Entry Mode -->
+            <div id="adminEntryMode" class="hidden">
+                <div class="mb-6 text-center">
+                    <i class="fa-solid fa-user-shield text-5xl text-yellow-500 mb-4"></i>
+                    <p class="text-slate-300 mb-4">관리자 모드로 접속합니다.</p>
+                    <input type="password" id="adminPasswordInput" class="w-2/3 mx-auto bg-slate-950 border border-slate-600 rounded p-3 text-white text-lg text-center focus:outline-none focus:border-yellow-500 transition-colors" placeholder="비밀번호 입력">
+                    <p id="adminErrorTxt" class="text-red-400 text-sm font-bold mt-2 h-5"></p>
+                </div>
+                <button onclick="joinAsAdmin()" class="w-full bg-yellow-600 hover:bg-yellow-500 text-white font-bold text-xl p-4 rounded-xl shadow-[0_0_15px_rgba(202,138,4,0.5)] transition-all">
+                    관리자 패널 열기
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Admin Panel Screen -->
+    <div id="adminScreen" class="fixed inset-0 z-30 hidden bg-slate-900 p-6 flex-col">
+        <div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-700">
+            <h1 class="text-3xl race-font font-black text-yellow-500"><i class="fa-solid fa-sliders"></i> RACE CONTROL PANEL</h1>
+            <div class="flex gap-4">
+                <button onclick="resetGame()" class="bg-red-600 hover:bg-red-500 px-6 py-2 rounded font-bold transition-colors">RESET RACE</button>
+                <button onclick="startGame()" id="adminStartBtn" class="bg-green-600 hover:bg-green-500 px-8 py-2 rounded font-bold transition-colors shadow-[0_0_15px_rgba(22,163,74,0.5)]">START RACE</button>
+            </div>
+        </div>
+
+        <div class="flex-1 grid grid-cols-2 gap-8 overflow-hidden">
+            <div class="bg-slate-800 rounded-xl p-6 flex flex-col">
+                <h2 class="text-xl text-slate-400 font-bold mb-4">현재 게임 상태</h2>
+                <div class="text-3xl font-black race-font mb-4 text-white" id="adminStatusTxt">WAITING</div>
+                
+                <h2 class="text-xl text-slate-400 font-bold mb-4 mt-6">이벤트 트리거 현황</h2>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-slate-700 p-4 rounded-lg">
+                        <p class="text-sm text-slate-400">40도달 (미니게임)</p>
+                        <p class="text-xl font-bold text-yellow-400" id="adminM40Txt">미발동</p>
+                    </div>
+                    <div class="bg-slate-700 p-4 rounded-lg">
+                        <p class="text-sm text-slate-400">80도달 (페널티)</p>
+                        <p class="text-xl font-bold text-red-400" id="adminM80Txt">미발동</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-slate-800 rounded-xl p-6 flex flex-col overflow-hidden">
+                <div class="flex justify-between items-end mb-4">
+                    <h2 class="text-xl text-slate-400 font-bold">접속중인 플레이어</h2>
+                    <span class="text-sm bg-blue-900 text-blue-200 px-3 py-1 rounded-full"><span id="adminPlayerCount">0</span> 명</span>
+                </div>
+                <div class="flex-1 overflow-y-auto pr-2" id="adminPlayerList">
+                    <!-- populated via JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. Main Game Screen -->
+    <div id="gameScreen" class="flex-1 flex flex-col hidden h-full bg-slate-900">
+        
+        <!-- TOP: Race Track Area (40% height) -->
+        <div class="h-[40%] bg-slate-800 relative shadow-[inset_0_-10px_20px_rgba(0,0,0,0.3)] border-b-4 border-slate-700 flex flex-col justify-evenly py-2 px-12">
+            
+            <!-- Absolute Wrapper for accurately aligned milestones and finish line -->
+            <div class="absolute left-12 right-12 top-0 bottom-0 pointer-events-none z-0">
+                <!-- 40km Milestone (33.33% of 120km) -->
+                <div class="absolute left-[33.33%] top-0 bottom-0 w-[2px] bg-yellow-500/50 flex flex-col justify-end pb-1">
+                    <span class="text-[10px] text-yellow-500 font-bold -ml-3 mb-1">40km</span>
+                </div>
+                <!-- 80km Milestone (66.66% of 120km) -->
+                <div class="absolute left-[66.66%] top-0 bottom-0 w-[2px] bg-red-500/50 flex flex-col justify-end pb-1">
+                    <span class="text-[10px] text-red-500 font-bold -ml-3 mb-1">80km</span>
+                </div>
+                <!-- 120km Goal Line (100%) -->
+                <div class="absolute left-[100%] top-0 bottom-0 w-4 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCI+PHJlY3Qgd2lkdGg9IjEwIiBoZWlnaHQ9IjEwIiBmaWxsPSJ3aGl0ZSIvPjxyZWN0IHg9IjEwIiB5PSIxMCIgd2lkdGg9IjEwIiBoZWlnaHQ9IjEwIiBmaWxsPSJ3aGl0ZSIvPjwvc3ZnPg==')] border-l-2 border-yellow-400 flex flex-col justify-end pb-1">
+                    <span class="text-[10px] text-white font-bold ml-5 mb-1 whitespace-nowrap drop-shadow-md">FINISH</span>
+                </div>
+            </div>
+
+            <!-- Lanes 1-5 (w-full fills the 0-120 distance exactly) -->
+            <div class="track-lane h-8 relative flex items-center w-full rounded-r z-10">
+                <span class="absolute -left-6 text-xs font-bold text-slate-500 race-font">1</span>
+                <i id="car1" class="fa-solid fa-fighter-jet fa-rotate-90 text-2xl text-red-500 car-icon absolute top-1/2" style="left: 0%;"></i>
+            </div>
+            <div class="track-lane h-8 relative flex items-center w-full rounded-r z-10">
+                <span class="absolute -left-6 text-xs font-bold text-slate-500 race-font">2</span>
+                <i id="car2" class="fa-solid fa-truck-monster text-2xl text-blue-500 car-icon absolute top-1/2" style="left: 0%;"></i>
+            </div>
+            <div class="track-lane h-8 relative flex items-center w-full rounded-r z-10">
+                <span class="absolute -left-6 text-xs font-bold text-slate-500 race-font">3</span>
+                <i id="car3" class="fa-solid fa-space-shuttle fa-rotate-90 text-2xl text-green-500 car-icon absolute top-1/2" style="left: 0%;"></i>
+            </div>
+            <div class="track-lane h-8 relative flex items-center w-full rounded-r z-10">
+                <span class="absolute -left-6 text-xs font-bold text-slate-500 race-font">4</span>
+                <i id="car4" class="fa-solid fa-truck-pickup text-2xl text-yellow-500 car-icon absolute top-1/2" style="left: 0%;"></i>
+            </div>
+            <div class="track-lane h-8 relative flex items-center w-full rounded-r z-10">
+                <span class="absolute -left-6 text-xs font-bold text-slate-500 race-font">5</span>
+                <i id="car5" class="fa-solid fa-rocket fa-rotate-90 text-2xl text-purple-500 car-icon absolute top-1/2" style="left: 0%;"></i>
+            </div>
+        </div>
+
+        <!-- BOTTOM: Interaction Area (60% height) -->
+        <div class="h-[60%] flex relative">
+            
+            <!-- Left Info Panel (Small) -->
+            <div class="w-1/4 bg-slate-900 border-r border-slate-700 p-4 flex flex-col justify-between">
+                <div>
+                    <p class="text-slate-400 text-sm font-bold mb-1">드라이버 정보</p>
+                    <p class="text-xl font-bold truncate" id="myInfoName">-</p>
+                    <div class="mt-2 inline-block px-3 py-1 rounded bg-slate-800 text-sm border border-slate-600" id="myInfoTeamBadge">
+                        TEAM -
+                    </div>
+                </div>
+                
+                <div class="bg-slate-800 p-3 rounded-lg border border-slate-700">
+                    <p class="text-xs text-slate-400 mb-1">획득 스코어</p>
+                    <p class="text-2xl font-black text-emerald-400 race-font" id="myScoreTxt">0</p>
+                    <p class="text-xs text-slate-400 mt-2 mb-1">해결한 문제</p>
+                    <p class="text-xl font-bold text-blue-400 race-font" id="mySolvedTxt">0</p>
+                </div>
+
+                <!-- AI Coach Button & Display -->
+                <div class="mt-4 bg-slate-800 p-3 rounded-lg border border-indigo-500 relative shadow-[0_0_10px_rgba(99,102,241,0.2)]">
+                    <p class="text-xs text-indigo-400 font-bold mb-2"><i class="fa-solid fa-robot"></i> AI 전술 코치</p>
+                    <p id="aiCoachMsg" class="text-xs text-slate-300 italic mb-3 leading-relaxed">"레이스를 준비하세요, 드라이버!"</p>
+                    <button onclick="askAICoach()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold py-2 rounded transition-colors" id="aiCoachBtn">
+                        <i class="fa-solid fa-bolt"></i> 코치에게 조언 구하기
+                    </button>
+                </div>
+
+                <!-- Event Status Info -->
+                <div class="text-xs mt-4" id="localPenaltyInfo">
+                    <p class="text-slate-500">엔진 상태 정상</p>
+                </div>
+            </div>
+
+            <!-- Right Main Play Area -->
+            <div class="w-3/4 bg-slate-950 p-4 relative overflow-hidden flex flex-col" id="playArea">
+                
+                <!-- State: Waiting for start -->
+                <div id="waitStartOverlay" class="absolute inset-0 z-20 bg-slate-900/90 backdrop-blur-sm flex flex-col items-center justify-center">
+                    <i class="fa-solid fa-flag-checkered text-5xl text-slate-400 mb-4 animate-bounce"></i>
+                    <h2 class="text-2xl font-bold text-white tracking-widest">관리자의 출발 신호를 대기중입니다</h2>
+                </div>
+
+                <!-- View 1: Card Selection -->
+                <div id="cardSelectionView" class="w-full h-full flex flex-col items-center justify-center hidden">
+                    <h3 class="text-lg text-slate-300 font-bold mb-4">해킹할 시스템 코드를 선택하세요</h3>
+                    <div class="flex gap-4 md:gap-8 justify-center w-full max-w-2xl px-4 h-48 md:h-56">
+                        
+                        <div class="flex-1 card-container cursor-pointer" onclick="selectCard('green')">
+                            <div class="card-inner" id="cardInnerGreen">
+                                <div class="card-front bg-gradient-to-br from-emerald-500 to-green-600 shadow-[0_0_15px_rgba(16,185,129,0.3)] flex flex-col items-center justify-center border-2 border-green-400 hover:scale-105 transition-transform">
+                                    <i class="fa-solid fa-leaf text-4xl text-white mb-2"></i>
+                                    <h4 class="font-bold text-white text-lg">초급 (+1)</h4>
+                                </div>
+                                <div class="card-back"></div>
+                            </div>
+                        </div>
+
+                        <div class="flex-1 card-container cursor-pointer" onclick="selectCard('yellow')">
+                            <div class="card-inner" id="cardInnerYellow">
+                                <div class="card-front bg-gradient-to-br from-yellow-400 to-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.3)] flex flex-col items-center justify-center border-2 border-yellow-300 hover:scale-105 transition-transform">
+                                    <i class="fa-solid fa-bolt text-4xl text-white mb-2"></i>
+                                    <h4 class="font-bold text-white text-lg">중급 (+3)</h4>
+                                </div>
+                                <div class="card-back"></div>
+                            </div>
+                        </div>
+
+                        <div class="flex-1 card-container cursor-pointer" onclick="selectCard('red')">
+                            <div class="card-inner" id="cardInnerRed">
+                                <div class="card-front bg-gradient-to-br from-red-500 to-rose-600 shadow-[0_0_15px_rgba(239,68,68,0.3)] flex flex-col items-center justify-center border-2 border-red-400 hover:scale-105 transition-transform">
+                                    <i class="fa-solid fa-fire text-4xl text-white mb-2"></i>
+                                    <h4 class="font-bold text-white text-lg">고급 (+6)</h4>
+                                </div>
+                                <div class="card-back"></div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- View 2: Problem Solving -->
+                <div id="problemSolvingView" class="w-full h-full flex gap-4 hidden">
+                    <!-- Problem Display -->
+                    <div class="flex-1 bg-slate-800 rounded-xl border border-slate-600 p-4 flex flex-col items-center justify-center relative">
+                        <button onclick="backToCards()" class="absolute top-3 left-3 text-slate-400 hover:text-white bg-slate-700 px-3 py-1 rounded text-sm"><i class="fa-solid fa-arrow-left"></i> 후퇴</button>
+                        
+                        <p class="text-sm text-blue-400 font-bold mb-2" id="probCategory">문제 유형</p>
+                        <div class="text-xl md:text-2xl font-bold text-center text-white mb-6 whitespace-pre-wrap px-8" id="probText">문제 텍스트</div>
+                        
+                        <!-- Input Display -->
+                        <div class="w-full max-w-sm bg-slate-900 border-2 border-blue-500 rounded-lg p-3 text-center min-h-[60px] flex items-center justify-center shadow-[0_0_15px_rgba(59,130,246,0.3)]">
+                            <span id="answerDisplay" class="text-3xl font-bold tracking-widest text-white"></span>
+                            <span class="animate-pulse text-blue-500 ml-1">_</span>
+                        </div>
+                    </div>
+
+                    <!-- Custom Math Keypad -->
+                    <div class="w-72 bg-slate-800 rounded-xl border border-slate-600 p-3 grid grid-cols-4 gap-2">
+                        <button class="key-btn" onclick="typeKey('1')">1</button>
+                        <button class="key-btn" onclick="typeKey('2')">2</button>
+                        <button class="key-btn" onclick="typeKey('3')">3</button>
+                        <button class="key-btn text-blue-400 text-2xl font-serif italic" onclick="typeKey('x')">x</button>
+                        
+                        <button class="key-btn" onclick="typeKey('4')">4</button>
+                        <button class="key-btn" onclick="typeKey('5')">5</button>
+                        <button class="key-btn" onclick="typeKey('6')">6</button>
+                        <button class="key-btn text-emerald-400 text-2xl" onclick="typeKey('+')">+</button>
+
+                        <button class="key-btn" onclick="typeKey('7')">7</button>
+                        <button class="key-btn" onclick="typeKey('8')">8</button>
+                        <button class="key-btn" onclick="typeKey('9')">9</button>
+                        <button class="key-btn text-emerald-400 text-3xl" onclick="typeKey('-')">-</button>
+
+                        <button class="key-btn key-clear" onclick="typeKey('C')">C</button>
+                        <button class="key-btn" onclick="typeKey('0')">0</button>
+                        <button class="key-btn text-emerald-400 text-xl font-black" onclick="typeKey('/')">/</button>
+                        <button class="key-btn key-action" onclick="submitAnswer()"><i class="fa-solid fa-paper-plane"></i></button>
+                    </div>
+                </div>
+
+                <!-- Milestone 40 Minigame Overlay -->
+                <div id="minigameOverlay" class="absolute inset-0 z-30 bg-slate-900/95 backdrop-blur-md hidden flex-col items-center justify-center p-4">
+                    <div class="text-center mb-6">
+                        <i class="fa-solid fa-shield-virus text-5xl text-yellow-500 mb-2"></i>
+                        <h2 class="text-2xl font-black text-white">시스템 해킹 방어</h2>
+                        <p class="text-slate-300 mt-1">숫자를 <strong class="text-yellow-400">작은 수부터 차례대로</strong> 빠르게 누르세요!</p>
+                        <p class="text-red-400 text-sm mt-1" id="mgErrorTxt"></p>
+                    </div>
+                    
+                    <div class="minigame-grid w-full max-w-md" id="mgContainer">
+                        <!-- Buttons injected via JS -->
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. Game End / Winner Screen -->
+    <div id="endScreen" class="fixed inset-0 z-50 bg-slate-900/95 flex-col items-center justify-center backdrop-blur-md hidden pb-10">
+        <h2 class="text-3xl text-slate-400 race-font tracking-widest mb-2 mt-10">RACE FINISHED</h2>
+        
+        <div class="text-center mb-10">
+            <i class="fa-solid fa-trophy text-7xl text-yellow-500 mb-4 drop-shadow-[0_0_20px_rgba(234,179,8,0.8)]"></i>
+            <h1 class="text-6xl font-black text-white mb-2">WINNER : <span id="winTeamName" class="text-yellow-400">TEAM 1</span></h1>
+            <p class="text-xl text-slate-300">우승을 축하합니다!</p>
+            
+            <!-- AI Victory Lore -->
+            <div class="mt-6 max-w-3xl mx-auto bg-indigo-900/40 border border-indigo-500 p-5 rounded-xl shadow-[0_0_20px_rgba(99,102,241,0.4)]">
+                <p class="text-sm text-indigo-300 font-bold mb-2"><i class="fa-solid fa-wand-magic-sparkles"></i> AI 레이스 기록관의 서사시</p>
+                <p id="aiVictoryLore" class="text-lg text-white italic leading-relaxed">위대한 우승의 기록을 우주망 서버에서 수신 중입니다...</p>
+            </div>
+        </div>
+
+        <div class="w-full max-w-4xl px-8 flex gap-8">
+            <div class="flex-1 bg-slate-800 rounded-xl p-6 border border-slate-600">
+                <h3 class="text-xl text-yellow-400 font-bold mb-4 border-b border-slate-700 pb-2"><i class="fa-solid fa-users"></i> 우승팀 드라이버 명단</h3>
+                <ul id="winMembersList" class="space-y-2 max-h-48 overflow-y-auto text-lg text-white font-bold">
+                    <!-- populated via js -->
+                </ul>
+            </div>
+
+            <div class="flex-1 flex flex-col gap-4">
+                <div class="bg-slate-800 rounded-xl p-6 border border-slate-600 flex items-center gap-4">
+                    <i class="fa-solid fa-medal text-4xl text-blue-400"></i>
+                    <div>
+                        <p class="text-sm text-slate-400">경기 MVP (최고 점수)</p>
+                        <p class="text-2xl font-bold text-white" id="mvpName">-</p>
+                        <p class="text-sm text-blue-300"><span id="mvpScore">0</span> PTS</p>
+                    </div>
+                </div>
+                <div class="bg-slate-800 rounded-xl p-6 border border-slate-600 flex items-center gap-4">
+                    <i class="fa-solid fa-brain text-4xl text-emerald-400"></i>
+                    <div>
+                        <p class="text-sm text-slate-400">최고의 두뇌 (최다 정답)</p>
+                        <p class="text-2xl font-bold text-white" id="brainName">-</p>
+                        <p class="text-sm text-emerald-300"><span id="brainCount">0</span> 문제 해결</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button onclick="location.reload()" class="mt-12 bg-slate-700 hover:bg-slate-600 px-8 py-3 rounded-lg text-white font-bold transition-colors">초기화 및 로비로 돌아가기</button>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, updateDoc, onSnapshot, increment, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // ==========================================
+        // ⚠️ [GITHUB 배포 시 주의사항]
+        // ==========================================
+        // 깃허브에서 이 게임을 학생들과 멀티플레이로 진행하려면 
+        // 본인의 Firebase 프로젝트를 생성하고 아래 firebaseConfig 객체를 교체해야 합니다.
+        // ==========================================
+        let firebaseConfig = {
+  apiKey: "AIzaSyDMcRf_D4ajjWXaHS98-fX-CWHJCBHDAk",
+  authDomain: "duru001-b5129.firebaseapp.com",
+  databaseURL: "https://duru001-b5129-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "duru001-b5129",
+  storageBucket: "duru001-b5129.firebasestorage.app",
+  messagingSenderId: "196539259225",
+  appId: "1:196539259225:web:74bc126eb12d6f1c481448",
+  measurementId: "G-J5ZNLLLQ3E"
+};
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'math-racing-team-v2';
+        try { if(typeof __firebase_config !== 'undefined') firebaseConfig = JSON.parse(__firebase_config); } catch (e) {}
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Firestore Strict Path Rules Followed
+        const GAME_DOC_PATH = `artifacts/${appId}/public/data/gameState/main`;
+        const PLAYERS_COL_PATH = `artifacts/${appId}/public/data/players`;
+        
+        let gameDocRef;
+        let myDocRef;
+
+        // Global State Variables
+        let userId = null;
+        let myData = { nickname: "", team: null, score: 0, solved: 0, isAdmin: false };
+        let gameState = { status: 'waiting', distances: { "1":0, "2":0, "3":0, "4":0, "5":0 }, m40: null, m80: null };
+        let playersMap = {}; 
+        let teamCounts = { 1:0, 2:0, 3:0, 4:0, 5:0 };
+
+        let currentCardLevel = null;
+        let currentProblem = null;
+        let currentInput = "";
+        
+        let minigameCleared = false;
+        let mgSortedTargets = [];
+        let mgCurrentTargetIndex = 0;
+
+        // BGM Control Variables
+        let isSoundOn = true;
+        const bgm = document.getElementById('racingBgm');
+
+        window.toggleSound = function() {
+            isSoundOn = !isSoundOn;
+            const icon = document.getElementById('soundIcon');
+            if(isSoundOn) {
+                bgm.play().catch(e => console.log("Audio play prevented:", e));
+                icon.className = "fa-solid fa-volume-high";
+            } else {
+                bgm.pause();
+                icon.className = "fa-solid fa-volume-xmark";
+            }
+        };
+
+        function playBgm() {
+            if(isSoundOn) {
+                bgm.volume = 0.3; // 배경음악 볼륨 30% 설정
+                bgm.play().catch(e => console.log("Audio play prevented:", e));
+            }
+        }
+
+        // ==========================================
+        // Gemini API Functions
+        // ==========================================
+        async function generateGeminiText(prompt) {
+            const apiKey = ""; // Leave empty. Environment automatically provides API Key.
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+            const payload = {
+                contents: [{ parts: [{ text: prompt }] }],
+            };
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+                if (result.candidates && result.candidates[0].content?.parts[0]?.text) {
+                    return result.candidates[0].content.parts[0].text;
+                }
+            } catch (e) {
+                console.error("Gemini API Error:", e);
+            }
+            return null;
+        }
+
+        window.askAICoach = async function() {
+            if(gameState.status !== 'playing') return;
+
+            const btn = document.getElementById('aiCoachBtn');
+            const msgEl = document.getElementById('aiCoachMsg');
+            
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> 분석 중...';
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
+
+            const teamName = teamColors[myData.team]?.name || "알 수 없는 팀";
+            const prompt = `너는 냉철하고 미래지향적인 사이버펑크 수학 레이싱 코치야. 현재 내 이름은 '${myData.nickname}'이고, '${teamName}' 소속이야. 내 점수는 ${myData.score}점이야. 일차식 수학 문제를 빨리 풀어서 레이싱에서 이길 수 있도록 아주 시크하고 강렬하게 1문장으로만 동기부여를 해줘.`;
+            
+            const aiResponse = await generateGeminiText(prompt);
+            msgEl.innerText = aiResponse ? `"${aiResponse}"` : "통신 방해가 발생했습니다. 다시 시도하십시오.";
+            
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-bolt"></i> 코치에게 조언 구하기';
+            btn.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+
+        async function generateVictoryLore(winTeam, mvp) {
+            const loreEl = document.getElementById('aiVictoryLore');
+            const teamName = teamColors[winTeam]?.name || `TEAM ${winTeam}`;
+            const mvpName = mvp ? mvp.nickname : "신원 미상의 에이스";
+            const mvpScore = mvp ? mvp.score : 0;
+
+            const prompt = `너는 전 우주에 생중계되는 거대한 '수학 레이싱 대회'의 열광적인 스포츠 캐스터야. 방금 '${teamName}' 팀이 압도적인 속도로 최종 우승을 차지했어! 특히 팀의 MVP인 '${mvpName}' 선수가 뛰어난 두뇌로 ${mvpScore}점이라는 대기록을 세웠지. 이 역사적인 순간을 극적이고 과장된 톤으로 딱 2문장으로 작성해서 축하해줘.`;
+
+            const lore = await generateGeminiText(prompt);
+            if(lore) {
+                loreEl.innerText = `"${lore}"`;
+            } else {
+                loreEl.innerText = "영광스러운 우승의 순간이 우주 기록소에 영구히 저장되었습니다!";
+            }
+        }
+        // ==========================================
+
+        const teamColors = {
+            1: { bg: 'bg-red-500', text: 'text-red-500', name: '이그니션 스피드스터', icon: 'fa-fighter-jet' },
+            2: { bg: 'bg-blue-500', text: 'text-blue-500', name: '이지스 저거너트', icon: 'fa-truck-monster' },
+            3: { bg: 'bg-green-500', text: 'text-green-500', name: '제퍼 호버크래프트', icon: 'fa-space-shuttle' },
+            4: { bg: 'bg-yellow-500', text: 'text-yellow-500', name: '솔라 버기', icon: 'fa-truck-pickup' },
+            5: { bg: 'bg-purple-500', text: 'text-purple-500', name: '보이드 인터셉터', icon: 'fa-rocket' }
+        };
+
+        async function initApp() {
+            try {
+                // Rule 3: Auth Before Queries
+                const token = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+                if (token) await signInWithCustomToken(auth, token);
+                else await signInAnonymously(auth);
+
+                if (!auth.currentUser) throw new Error("Auth failed");
+                userId = auth.currentUser.uid;
+                myDocRef = doc(db, PLAYERS_COL_PATH, userId);
+                gameDocRef = doc(db, GAME_DOC_PATH);
+
+                await setDoc(gameDocRef, {
+                    status: 'waiting',
+                    distances: { "1":0, "2":0, "3":0, "4":0, "5":0 },
+                    m40: null, m80: null, winner: null
+                }, { merge: true });
+
+                // Rule 2: Simple Snapshot queries
+                onSnapshot(gameDocRef, (snap) => {
+                    if(snap.exists()) handleGameStateUpdate(snap.data());
+                }, (e) => console.error(e));
+
+                onSnapshot(collection(db, PLAYERS_COL_PATH), (snap) => {
+                    playersMap = {};
+                    snap.forEach(d => { playersMap[d.id] = d.data(); });
+                    if(myData.isAdmin) updateAdminPlayerList();
+                    updateTeamCountsUI();
+                }, (e) => console.error(e));
+
+                document.getElementById('loadingScreen').classList.add('hidden');
+                document.getElementById('lobbyScreen').classList.remove('hidden');
+                document.getElementById('lobbyScreen').classList.add('flex');
+
+            } catch (e) {
+                document.getElementById('loadingScreen').innerHTML = `<h2 class="text-red-500">INIT ERROR: ${e.message}</h2>`;
+            }
+        }
+
+        window.toggleAdminLogin = function() {
+            const pe = document.getElementById('playerEntryMode');
+            const ae = document.getElementById('adminEntryMode');
+            if(pe.classList.contains('hidden')) {
+                pe.classList.remove('hidden'); ae.classList.add('hidden');
+            } else {
+                pe.classList.add('hidden'); ae.classList.remove('hidden');
+                document.getElementById('adminPasswordInput').value = "";
+                document.getElementById('adminErrorTxt').innerText = "";
+            }
+        }
+
+        function updateTeamCountsUI() {
+            teamCounts = { 1:0, 2:0, 3:0, 4:0, 5:0 };
+            Object.values(playersMap).forEach(p => {
+                if(!p.isAdmin && p.team >= 1 && p.team <= 5) {
+                    teamCounts[p.team]++;
+                }
+            });
+            for(let i=1; i<=5; i++) {
+                const countEl = document.getElementById(`teamCount${i}`);
+                if(countEl) {
+                    countEl.innerText = `${teamCounts[i]} / 6 명`;
+                    if(teamCounts[i] >= 6) {
+                        countEl.classList.replace('text-slate-400', 'text-red-400');
+                        countEl.classList.replace('border-slate-600', 'border-red-500');
+                    } else {
+                        countEl.classList.replace('text-red-400', 'text-slate-400');
+                        countEl.classList.replace('border-red-500', 'border-slate-600');
+                    }
+                }
+            }
+        }
+
+        window.selectTeam = function(teamNum) {
+            document.getElementById('joinErrorTxt').innerText = "";
+            if (teamCounts[teamNum] >= 6) {
+                document.getElementById('joinErrorTxt').innerText = "해당 팀은 이미 최대 인원(6명)이 모두 찼습니다.";
+                return;
+            }
+            myData.team = teamNum;
+            for(let i=1; i<=5; i++) {
+                const btn = document.getElementById(`teamBtn${i}`);
+                if(i === teamNum) {
+                    btn.classList.remove('opacity-50', 'border-slate-600');
+                    btn.classList.add('opacity-100', 'border-white', 'bg-slate-700');
+                } else {
+                    btn.classList.add('opacity-50', 'border-slate-600');
+                    btn.classList.remove('opacity-100', 'border-white', 'bg-slate-700');
+                }
+            }
+        }
+
+        window.joinGame = async function() {
+            const nn = document.getElementById('nicknameInput').value.trim();
+            document.getElementById('joinErrorTxt').innerText = "";
+            
+            if(!nn) {
+                document.getElementById('joinErrorTxt').innerText = "이름을 입력해주세요.";
+                return;
+            }
+            if(!myData.team) {
+                document.getElementById('joinErrorTxt').innerText = "차량(팀)을 선택해주세요.";
+                return;
+            }
+            if (teamCounts[myData.team] >= 6) {
+                document.getElementById('joinErrorTxt').innerText = "선택한 팀이 가득 찼습니다. 다른 팀을 선택해주세요.";
+                return;
+            }
+
+            myData.nickname = nn;
+            myData.isAdmin = false;
+            
+            try {
+                playBgm(); // 참가 시 음악 재생 시작
+                await setDoc(myDocRef, myData);
+                enterGameScreen();
+            } catch(e) { console.error("Join error", e); }
+        }
+
+        window.joinAsAdmin = async function() {
+            const pwd = document.getElementById('adminPasswordInput').value;
+            const errEl = document.getElementById('adminErrorTxt');
+            
+            if(pwd !== '2026') {
+                errEl.innerText = "비밀번호가 일치하지 않습니다.";
+                return;
+            }
+
+            myData.isAdmin = true;
+            myData.nickname = "ADMIN";
+            try {
+                playBgm(); // 관리자 접속 시 음악 재생 시작
+                await setDoc(myDocRef, myData);
+                document.getElementById('lobbyScreen').classList.add('hidden');
+                document.getElementById('adminScreen').classList.remove('hidden');
+                document.getElementById('adminScreen').classList.add('flex');
+            } catch(e) { console.error(e); }
+        }
+
+        function enterGameScreen() {
+            document.getElementById('lobbyScreen').classList.add('hidden');
+            document.getElementById('gameScreen').classList.remove('hidden');
+            
+            document.getElementById('myInfoName').innerText = myData.nickname;
+            const tColor = teamColors[myData.team];
+            const badge = document.getElementById('myInfoTeamBadge');
+            badge.innerText = tColor.name;
+            badge.className = `mt-2 inline-block px-3 py-1 rounded border border-slate-600 text-sm font-bold ${tColor.text}`;
+        }
+
+        window.startGame = async function() {
+            await updateDoc(gameDocRef, { status: 'playing' });
+        }
+        window.resetGame = async function() {
+            await updateDoc(gameDocRef, {
+                status: 'waiting',
+                distances: { "1":0, "2":0, "3":0, "4":0, "5":0 },
+                m40: null, m80: null, winner: null
+            });
+        }
+
+        function updateAdminPlayerList() {
+            const list = document.getElementById('adminPlayerList');
+            list.innerHTML = '';
+            let count = 0;
+            Object.values(playersMap).forEach(p => {
+                if(p.isAdmin) return;
+                count++;
+                const div = document.createElement('div');
+                div.className = 'bg-slate-700 p-3 rounded mb-2 flex justify-between items-center';
+                div.innerHTML = `
+                    <span class="font-bold text-white">${p.nickname}</span>
+                    <span class="text-xs px-2 py-1 bg-slate-800 rounded font-bold ${teamColors[p.team]?.text}">${teamColors[p.team]?.name}</span>
+                `;
+                list.appendChild(div);
+            });
+            document.getElementById('adminPlayerCount').innerText = count;
+        }
+
+        function gcd(a, b) { return b === 0 ? a : gcd(b, a % b); }
+
+        function generateProblem(level) {
+            let qText = "", ansText = "";
+            let rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+            if (level === 'green') {
+                let a = rand(-9, 9); if(a===0) a=1;
+                let b = rand(-9, 9); if(b===0) b=2;
+                let type = rand(0, 1);
+                
+                let exp = "";
+                if(a===1) exp += "x"; else if(a===-1) exp += "-x"; else exp += a + "x";
+                if(b>0) exp += " + " + b; else exp += " - " + Math.abs(b);
+
+                if (type === 0) {
+                    qText = `다음 식에서 x의 계수는?\n\n${exp}`;
+                    ansText = a.toString();
+                } else {
+                    qText = `다음 식에서 상수항은?\n\n${exp}`;
+                    ansText = b.toString();
+                }
+            } 
+            else if (level === 'yellow') {
+                let a = rand(-9, 9); if(a===0) a=2;
+                let c = rand(-5, 5); if(c===0) c=3;
+                
+                let isDiv = rand(0, 1) === 0;
+                if(isDiv) {
+                    let ans = a;
+                    let orig = a * c; 
+                    qText = `계산하시오:\n\n${orig}x ÷ ${c < 0 ? `(${c})` : c}`;
+                    ansText = ans===1 ? "x" : ans===-1 ? "-x" : ans+"x";
+                } else {
+                    qText = `계산하시오:\n\n${a}x × ${c < 0 ? `(${c})` : c}`;
+                    let result = a * c;
+                    ansText = result===1 ? "x" : result===-1 ? "-x" : result+"x";
+                }
+            }
+            else if (level === 'red') {
+                let d1 = rand(2, 5);
+                let c = d1 * (rand(1,2));
+                if(Math.random() > 0.5) c = -c;
+
+                let ansA = rand(-5, 5); if(ansA===0) ansA=1;
+                let ansB = rand(-5, 5); if(ansB===0) ansB=1;
+
+                function sFrac(n, d) {
+                    let neg = (n < 0) !== (d < 0);
+                    n = Math.abs(n); d = Math.abs(d);
+                    let g = gcd(n, d);
+                    n /= g; d /= g;
+                    if(d===1) return (neg?"-":"") + n;
+                    return (neg?"-":"") + n + "/" + d;
+                }
+
+                let term1C = sFrac(ansA, c);
+                let term1 = term1C === "1" ? "x" : term1C === "-1" ? "-x" : term1C + "x";
+                
+                let term2 = sFrac(ansB, c);
+                let sign2 = term2.startsWith("-") ? "-" : "+";
+                term2 = term2.replace("-", "");
+
+                qText = `계산하시오 (x항을 먼저):\n\n( ${term1} ${sign2} ${term2} ) × ${c < 0 ? `(${c})` : c}`;
+                
+                let partA = ansA===1 ? "x" : ansA===-1 ? "-x" : ansA+"x";
+                let partB = ansB>0 ? "+"+ansB : ansB.toString();
+                ansText = partA + partB;
+            }
+
+            return { qText, ansText };
+        }
+
+        window.selectCard = function(level) {
+            if(gameState.status !== 'playing') return;
+            
+            const inner = document.getElementById(level === 'green' ? 'cardInnerGreen' : level === 'yellow' ? 'cardInnerYellow' : 'cardInnerRed');
+            inner.parentElement.classList.add('flipped');
+            
+            setTimeout(() => {
+                currentCardLevel = level;
+                currentProblem = generateProblem(level);
+                currentInput = "";
+                
+                document.getElementById('cardSelectionView').classList.add('hidden');
+                document.getElementById('problemSolvingView').classList.remove('hidden');
+                
+                let catName = level==='green' ? '초급문제' : level==='yellow' ? '중급문제' : '고급문제';
+                document.getElementById('probCategory').innerText = catName;
+                document.getElementById('probCategory').className = `text-sm font-bold mb-2 ${level==='green'?'text-emerald-400':level==='yellow'?'text-yellow-400':'text-red-400'}`;
+                
+                document.getElementById('probText').innerText = currentProblem.qText;
+                updateInputDisplay();
+                
+                inner.parentElement.classList.remove('flipped');
+            }, 600); 
+        }
+
+        window.backToCards = function() {
+            document.getElementById('problemSolvingView').classList.add('hidden');
+            document.getElementById('cardSelectionView').classList.remove('hidden');
+        }
+
+        window.typeKey = function(key) {
+            if(key === 'C') { currentInput = ""; }
+            else { currentInput += key; }
+            updateInputDisplay();
+        }
+
+        function updateInputDisplay() {
+            document.getElementById('answerDisplay').innerText = currentInput;
+        }
+
+        window.submitAnswer = async function() {
+            if(!currentProblem) return;
+            
+            let uAns = currentInput.replace(/\s/g, '');
+            let cAns = currentProblem.ansText.replace(/\s/g, '');
+
+            if(uAns.includes("1x")) uAns = uAns.replace("1x", "x");
+            if(uAns.includes("+1x")) uAns = uAns.replace("+1x", "+x");
+            if(uAns.startsWith("-1x")) uAns = uAns.replace("-1x", "-x");
+
+            if(uAns === cAns) {
+                // 정답 로직
+                let pts = currentCardLevel === 'green' ? 10 : currentCardLevel === 'yellow' ? 30 : 60;
+                let dist = currentCardLevel === 'green' ? 1 : currentCardLevel === 'yellow' ? 3 : 6;
+                
+                // Penalty 80 적용 로직
+                if (gameState.m80 === myData.team) {
+                    if (currentCardLevel === 'yellow') dist = 2;
+                    if (currentCardLevel === 'red') dist = 4;
+                }
+
+                myData.score += pts;
+                myData.solved += 1;
+                
+                document.getElementById('myScoreTxt').innerText = myData.score;
+                document.getElementById('mySolvedTxt').innerText = myData.solved;
+
+                try {
+                    await updateDoc(myDocRef, { score: myData.score, solved: myData.solved });
+                    
+                    const distKey = `distances.${myData.team}`;
+                    await updateDoc(gameDocRef, { [distKey]: increment(dist) });
+                    
+                    let newApproxDist = gameState.distances[myData.team] + dist;
+                    if(newApproxDist >= 40 && !gameState.m40) await updateDoc(gameDocRef, { m40: myData.team });
+                    if(newApproxDist >= 80 && !gameState.m80) await updateDoc(gameDocRef, { m80: myData.team });
+                    if(newApproxDist >= 120 && !gameState.winner) await updateDoc(gameDocRef, { winner: myData.team, status: 'ended' });
+
+                } catch(e) { console.error(e); }
+
+                backToCards();
+            } else {
+                // 오답 로직
+                const inputArea = document.getElementById('answerDisplay').parentElement;
+                inputArea.classList.add('border-red-500', 'animate-shake');
+                setTimeout(() => {
+                    inputArea.classList.remove('border-red-500', 'animate-shake');
+                    currentInput = "";
+                    updateInputDisplay();
+                }, 500);
+            }
+        }
+
+        function checkAndTriggerMinigame() {
+            if (gameState.m40 === myData.team && !minigameCleared && gameState.status === 'playing') {
+                showMinigame();
+            }
+        }
+
+        function showMinigame() {
+            const overlay = document.getElementById('minigameOverlay');
+            overlay.classList.remove('hidden');
+            overlay.classList.add('flex');
+            
+            const container = document.getElementById('mgContainer');
+            container.innerHTML = '';
+            
+            // 1~99 랜덤 숫자 10개 추출
+            let nums = [];
+            while(nums.length < 10) {
+                let r = Math.floor(Math.random() * 99) + 1;
+                if(!nums.includes(r)) nums.push(r);
+            }
+
+            // 정답 순서 계산
+            mgSortedTargets = [...nums].sort((a,b) => a - b);
+            mgCurrentTargetIndex = 0;
+            document.getElementById('mgErrorTxt').innerText = "";
+
+            nums.forEach(n => {
+                let btn = document.createElement('button');
+                btn.className = "mg-btn";
+                btn.innerText = n;
+                btn.onclick = () => handleMgClick(btn, n);
+                container.appendChild(btn);
+            });
+        }
+
+        function handleMgClick(btn, n) {
+            if (n === mgSortedTargets[mgCurrentTargetIndex]) {
+                btn.classList.add('mg-hidden');
+                mgCurrentTargetIndex++;
+                if (mgCurrentTargetIndex >= 10) {
+                    minigameCleared = true;
+                    document.getElementById('minigameOverlay').classList.add('hidden');
+                    document.getElementById('minigameOverlay').classList.remove('flex');
+                }
+            } else {
+                // 순서가 틀림
+                document.getElementById('mgErrorTxt').innerText = "순서가 틀렸습니다! 시스템 재부팅 대기중...";
+                const container = document.getElementById('mgContainer');
+                container.classList.add('animate-shake');
+                
+                const overlay = document.getElementById('minigameOverlay');
+                overlay.style.pointerEvents = 'none';
+                
+                setTimeout(() => {
+                    container.classList.remove('animate-shake');
+                    overlay.style.pointerEvents = 'auto';
+                    document.getElementById('mgErrorTxt').innerText = "";
+                }, 3000);
+            }
+        }
+
+        function handleGameStateUpdate(data) {
+            const oldStatus = gameState.status;
+            gameState = data;
+
+            if(myData.isAdmin) {
+                document.getElementById('adminStatusTxt').innerText = data.status.toUpperCase();
+                document.getElementById('adminM40Txt').innerText = data.m40 ? `${teamColors[data.m40].name}` : '미발동';
+                document.getElementById('adminM80Txt').innerText = data.m80 ? `${teamColors[data.m80].name}` : '미발동';
+            }
+
+            // 차량 이동 애니메이션 업데이트 (120을 100%로 환산)
+            for(let i=1; i<=5; i++) {
+                const icon = document.getElementById(`car${i}`);
+                if(icon) {
+                    let d = data.distances[i] || 0;
+                    let pct = Math.min(100, (d / 120) * 100);
+                    icon.style.left = `${pct}%`;
+                }
+            }
+
+            if (data.status === 'playing') {
+                if (oldStatus !== 'playing') {
+                    document.getElementById('waitStartOverlay').classList.add('hidden');
+                    document.getElementById('cardSelectionView').classList.remove('hidden');
+                    minigameCleared = false; 
+                }
+                
+                checkAndTriggerMinigame();
+
+                const penInfo = document.getElementById('localPenaltyInfo');
+                if (data.m80 === myData.team) {
+                    penInfo.innerHTML = `<p class="text-red-400 font-bold"><i class="fa-solid fa-triangle-exclamation"></i> 엔진 출력 저하 페널티!</p>`;
+                    document.getElementById('playArea').classList.add('penalty-screen');
+                } else {
+                    penInfo.innerHTML = `<p class="text-slate-500">엔진 상태 정상</p>`;
+                    document.getElementById('playArea').classList.remove('penalty-screen');
+                }
+            }
+
+            if (data.status === 'ended') {
+                showEndScreen(data.winner);
+            } else {
+                document.getElementById('endScreen').classList.add('hidden');
+                document.getElementById('endScreen').classList.remove('flex');
+            }
+        }
+
+        function showEndScreen(winTeam) {
+            document.getElementById('endScreen').classList.remove('hidden');
+            document.getElementById('endScreen').classList.add('flex');
+            
+            const winNameEl = document.getElementById('winTeamName');
+            winNameEl.innerText = teamColors[winTeam]?.name || `TEAM ${winTeam}`;
+            winNameEl.className = teamColors[winTeam]?.text || 'text-white';
+
+            let topScore = -1, mvp = null;
+            let topSolve = -1, brain = null;
+            const winMembers = [];
+
+            Object.values(playersMap).forEach(p => {
+                if(p.isAdmin) return;
+                if(p.team === winTeam) winMembers.push(p.nickname);
+                
+                if(p.score > topScore) { topScore = p.score; mvp = p; }
+                if(p.solved > topSolve) { topSolve = p.solved; brain = p; }
+            });
+
+            const wl = document.getElementById('winMembersList');
+            wl.innerHTML = '';
+            if(winMembers.length === 0) wl.innerHTML = '<li class="text-slate-500">배정된 드라이버 없음</li>';
+            winMembers.forEach(n => {
+                let li = document.createElement('li');
+                li.innerText = n;
+                wl.appendChild(li);
+            });
+
+            if(mvp) {
+                document.getElementById('mvpName').innerText = mvp.nickname;
+                document.getElementById('mvpScore').innerText = mvp.score;
+            }
+            if(brain) {
+                document.getElementById('brainName').innerText = brain.nickname;
+                document.getElementById('brainCount').innerText = brain.solved;
+            }
+
+            // 경기 종료 후 AI 서사시 생성
+            generateVictoryLore(winTeam, mvp);
+        }
+
+        // Init
+        window.addEventListener('load', initApp);
+
+    </script>
+</body>
+</html>
