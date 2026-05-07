@@ -529,6 +529,14 @@
         // 깃허브에서 이 게임을 학생들과 멀티플레이로 진행하려면 
         // 본인의 Firebase 프로젝트를 생성하고 아래 firebaseConfig 객체를 교체해야 합니다.
         // ==========================================
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey: "AIzaSyDMcRf_D4ajjJWxaHS98-fX-CWHJCBHDAk",
   authDomain: "duru001-b5129.firebaseapp.com",
@@ -539,6 +547,10 @@ const firebaseConfig = {
   appId: "1:196539259225:web:74bc126eb12d6f1c481448",
   measurementId: "G-J5ZNLLLQ3E"
 };
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'math-racing-team-v2';
         try { if(typeof __firebase_config !== 'undefined') firebaseConfig = JSON.parse(__firebase_config); } catch (e) {}
 
