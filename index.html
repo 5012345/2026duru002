@@ -183,7 +183,7 @@
 
         <div class="flex-1 grid grid-cols-2 gap-8 overflow-hidden">
             <div class="bg-slate-800 rounded-xl p-6 flex flex-col border border-slate-700">
-                <h2 class="text-xl text-slate-400 font-bold mb-4">현재 게임 상태</h2>
+                <h2 class="text-xl text-slate-400 font-bold mb-4 uppercase tracking-widest">SERVER STATE</h2>
                 <div class="text-3xl font-black race-font mb-4 text-white uppercase" id="adminStatusTxt">WAITING</div>
                 <div class="grid grid-cols-2 gap-4 mt-4">
                     <div class="bg-slate-700 p-4 rounded-lg">
@@ -211,6 +211,7 @@
 
     <!-- 4. Main Game Screen -->
     <div id="gameScreen" class="flex-1 flex flex-col hidden h-full bg-slate-900">
+        <!-- TOP: Track Area -->
         <div class="h-[40%] bg-slate-800 relative shadow-inner border-b-4 border-slate-700 py-4 px-12">
             <div class="relative w-full h-full flex flex-col justify-evenly">
                 <div class="absolute left-0 right-0 top-0 bottom-0 pointer-events-none z-0">
@@ -227,44 +228,71 @@
             </div>
         </div>
 
+        <!-- BOTTOM: Play Area -->
         <div class="h-[60%] flex relative">
             <div id="waitStartOverlay" class="absolute inset-0 z-20 bg-slate-900/90 backdrop-blur-sm flex flex-col items-center justify-center">
                 <i class="fa-solid fa-flag-checkered text-5xl text-slate-400 mb-4 animate-bounce"></i>
-                <h2 class="text-2xl font-bold text-white tracking-widest">관리자의 출발 신호를 대기 중입니다</h2>
+                <h2 class="text-2xl font-bold text-white tracking-widest uppercase">Waiting for start signal...</h2>
             </div>
             
+            <!-- Left Info Panel (Driver & Achievement Breakdown) -->
             <div class="w-1/4 bg-slate-900 border-r border-slate-700 p-4 flex flex-col justify-between">
                 <div>
-                    <p class="text-slate-400 text-xs font-bold mb-1 uppercase tracking-widest">Driver Info</p>
-                    <p class="text-xl font-bold truncate" id="myInfoName">-</p>
-                    <div class="mt-2 inline-block px-3 py-1 rounded bg-slate-800 text-sm border border-slate-600 font-bold uppercase tracking-tighter" id="myInfoTeamBadge">TEAM -</div>
+                    <p class="text-slate-500 text-[10px] font-bold mb-1 uppercase tracking-widest">Driver Info</p>
+                    <p class="text-xl font-bold truncate text-white" id="myInfoName">-</p>
+                    <div class="mt-2 inline-block px-3 py-1 rounded bg-slate-800 text-xs border border-slate-600 font-bold uppercase tracking-tighter" id="myInfoTeamBadge">TEAM -</div>
                 </div>
-                <div class="bg-slate-800 p-3 rounded-lg border border-slate-700">
-                    <p class="text-xs text-slate-400 mb-1">획득 스코어</p>
-                    <p class="text-3xl font-black text-emerald-400 race-font" id="myScoreTxt">0</p>
+
+                <div class="bg-slate-800 p-3 rounded-lg border border-slate-700 mt-4">
+                    <p class="text-white text-xs font-bold mb-3 border-b border-slate-700 pb-1">정답 문제 통계</p>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <span class="text-emerald-400 text-xs font-bold">● 초급 문제</span>
+                            <span class="text-lg font-black race-font text-white" id="mySolvedGreenTxt">0</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-yellow-400 text-xs font-bold">● 중급 문제</span>
+                            <span class="text-lg font-black race-font text-white" id="mySolvedYellowTxt">0</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-rose-400 text-xs font-bold">● 고급 문제</span>
+                            <span class="text-lg font-black race-font text-white" id="mySolvedRedTxt">0</span>
+                        </div>
+                    </div>
                 </div>
-                <div id="localPenaltyInfo" class="text-xs py-2 px-3 bg-slate-800 rounded border border-slate-700 text-slate-500">엔진 상태 정상</div>
+
+                <div id="localPenaltyInfo" class="text-[10px] py-2 px-3 bg-slate-800 rounded border border-slate-700 text-slate-500 text-center font-bold">엔진 상태 정상</div>
             </div>
 
+            <!-- Right Main Play Area (Cards broadened) -->
             <div class="w-3/4 bg-slate-950 p-4 relative overflow-hidden flex flex-col" id="playArea">
                 <div id="cardSelectionView" class="w-full h-full flex flex-col items-center justify-center hidden">
-                    <h3 class="text-lg text-slate-300 font-bold mb-4">계산 난이도를 선택하세요</h3>
-                    <div class="flex gap-4 md:gap-8 justify-center w-full max-w-2xl px-4 h-48 md:h-56">
+                    <h3 class="text-xl text-slate-300 font-bold mb-8 tracking-wide">문제 난이도를 선택하세요</h3>
+                    <div class="flex gap-6 md:gap-10 justify-center w-full max-w-5xl px-4 h-56 md:h-64">
                         <div class="flex-1 card-container cursor-pointer" onclick="selectCard('green')">
                             <div class="card-inner" id="cardInnerGreen">
-                                <div class="card-front bg-emerald-600 border-2 border-emerald-400 flex flex-col items-center justify-center"><i class="fa-solid fa-leaf text-4xl text-white mb-2"></i><h4 class="font-bold text-lg">초급 (+1)</h4></div>
+                                <div class="card-front bg-gradient-to-br from-emerald-600 to-green-700 border-2 border-emerald-400 flex flex-col items-center justify-center shadow-[0_10px_30px_rgba(16,185,129,0.3)] hover:scale-105 transition-all">
+                                    <i class="fa-solid fa-leaf text-5xl text-white mb-4"></i>
+                                    <h4 class="font-black text-2xl text-white">초급 (+1)</h4>
+                                </div>
                                 <div class="card-back"></div>
                             </div>
                         </div>
                         <div class="flex-1 card-container cursor-pointer" onclick="selectCard('yellow')">
                             <div class="card-inner" id="cardInnerYellow">
-                                <div class="card-front bg-yellow-500 border-2 border-yellow-300 flex flex-col items-center justify-center text-slate-900"><i class="fa-solid fa-bolt text-4xl mb-2"></i><h4 class="font-bold text-lg">중급 (+3)</h4></div>
+                                <div class="card-front bg-gradient-to-br from-yellow-500 to-amber-600 border-2 border-yellow-300 flex flex-col items-center justify-center text-slate-900 shadow-[0_10px_30px_rgba(245,158,11,0.3)] hover:scale-105 transition-all">
+                                    <i class="fa-solid fa-bolt text-5xl mb-4"></i>
+                                    <h4 class="font-black text-2xl">중급 (+3)</h4>
+                                </div>
                                 <div class="card-back"></div>
                             </div>
                         </div>
                         <div class="flex-1 card-container cursor-pointer" onclick="selectCard('red')">
                             <div class="card-inner" id="cardInnerRed">
-                                <div class="card-front bg-red-600 border-2 border-red-400 flex flex-col items-center justify-center"><i class="fa-solid fa-fire text-4xl text-white mb-2"></i><h4 class="font-bold text-lg">고급 (+6)</h4></div>
+                                <div class="card-front bg-gradient-to-br from-rose-600 to-red-700 border-2 border-rose-400 flex flex-col items-center justify-center shadow-[0_10px_30px_rgba(225,29,72,0.3)] hover:scale-105 transition-all">
+                                    <i class="fa-solid fa-fire text-5xl text-white mb-4"></i>
+                                    <h4 class="font-black text-2xl text-white">고급 (+6)</h4>
+                                </div>
                                 <div class="card-back"></div>
                             </div>
                         </div>
@@ -273,41 +301,44 @@
 
                 <div id="problemSolvingView" class="w-full h-full flex gap-4 hidden">
                     <div class="flex-1 bg-slate-800 rounded-xl border border-slate-600 p-4 flex flex-col items-center justify-center relative">
-                        <button onclick="backToCards()" class="absolute top-3 left-3 text-slate-400 bg-slate-700 px-3 py-1 rounded text-sm hover:text-white">후퇴</button>
-                        <p id="probCategory" class="text-sm font-bold mb-2">문제</p>
-                        <div id="probText" class="text-2xl font-bold text-center text-white mb-6 whitespace-pre-wrap"></div>
-                        <div class="w-full max-w-sm bg-slate-900 border-2 border-blue-500 rounded-lg p-3 text-center min-h-[60px] flex items-center justify-center shadow-lg">
-                            <span id="answerDisplay" class="text-3xl font-bold tracking-widest text-white"></span>
-                            <span class="animate-pulse text-blue-500 ml-1">_</span>
+                        <button onclick="backToCards()" class="absolute top-3 left-3 text-slate-400 bg-slate-700 px-3 py-1 rounded text-sm hover:text-white transition-colors">후퇴</button>
+                        <p id="probCategory" class="text-sm font-bold mb-2 uppercase tracking-widest text-blue-400"></p>
+                        <div id="probText" class="text-3xl font-bold text-center text-white mb-8 whitespace-pre-wrap px-10"></div>
+                        <div class="w-full max-w-sm bg-slate-950 border-4 border-blue-600 rounded-2xl p-4 text-center min-h-[80px] flex items-center justify-center shadow-2xl">
+                            <span id="answerDisplay" class="text-4xl font-black tracking-widest text-white"></span>
+                            <span class="animate-pulse text-blue-500 ml-2 text-4xl">_</span>
                         </div>
                     </div>
-                    <div class="w-72 bg-slate-800 rounded-xl border border-slate-600 p-3 grid grid-cols-4 gap-2">
-                        <button class="key-btn" onclick="typeKey('1')">1</button><button class="key-btn" onclick="typeKey('2')">2</button><button class="key-btn" onclick="typeKey('3')">3</button><button class="key-btn text-blue-400 italic" onclick="typeKey('x')">x</button>
-                        <button class="key-btn" onclick="typeKey('4')">4</button><button class="key-btn" onclick="typeKey('5')">5</button><button class="key-btn" onclick="typeKey('6')">6</button><button class="key-btn text-emerald-400" onclick="typeKey('+')">+</button>
-                        <button class="key-btn" onclick="typeKey('7')">7</button><button class="key-btn" onclick="typeKey('8')">8</button><button class="key-btn" onclick="typeKey('9')">9</button><button class="key-btn text-emerald-400" onclick="typeKey('-')">-</button>
-                        <button class="key-btn key-clear" onclick="typeKey('C')">C</button><button class="key-btn" onclick="typeKey('0')">0</button><button class="key-btn text-emerald-400" onclick="typeKey('/')">/</button><button class="key-btn key-action" onclick="submitAnswer()"><i class="fa-solid fa-paper-plane"></i></button>
+                    <!-- Custom Math Keypad -->
+                    <div class="w-80 bg-slate-900 rounded-xl border border-slate-700 p-3 grid grid-cols-4 gap-2 shadow-2xl">
+                        <button class="key-btn h-14" onclick="typeKey('1')">1</button><button class="key-btn h-14" onclick="typeKey('2')">2</button><button class="key-btn h-14" onclick="typeKey('3')">3</button><button class="key-btn h-14 text-blue-400 italic text-2xl" onclick="typeKey('x')">x</button>
+                        <button class="key-btn h-14" onclick="typeKey('4')">4</button><button class="key-btn h-14" onclick="typeKey('5')">5</button><button class="key-btn h-14" onclick="typeKey('6')">6</button><button class="key-btn h-14 text-emerald-400 text-2xl" onclick="typeKey('+')">+</button>
+                        <button class="key-btn h-14" onclick="typeKey('7')">7</button><button class="key-btn h-14" onclick="typeKey('8')">8</button><button class="key-btn h-14" onclick="typeKey('9')">9</button><button class="key-btn h-14 text-emerald-400 text-3xl" onclick="typeKey('-')">-</button>
+                        <button class="key-btn h-14 key-clear" onclick="typeKey('C')">C</button><button class="key-btn h-14" onclick="typeKey('0')">0</button><button class="key-btn h-14 text-emerald-400 text-2xl" onclick="typeKey('/')">/</button><button class="key-btn h-14 key-action" onclick="submitAnswer()"><i class="fa-solid fa-paper-plane"></i></button>
                     </div>
                 </div>
 
-                <div id="minigameOverlay" class="absolute inset-0 z-30 bg-slate-900/95 backdrop-blur-md hidden flex-col items-center justify-center p-4">
-                    <div class="text-center mb-6">
-                        <i class="fa-solid fa-shield-virus text-5xl text-yellow-500 mb-2"></i>
-                        <h2 class="text-2xl font-black text-white">시스템 해킹 방어</h2>
-                        <p class="text-slate-300 mt-1">숫자를 <strong class="text-yellow-400">작은 수부터 차례대로</strong> 빠르게 누르세요!</p>
-                        <p id="mgErrorTxt" class="text-red-400 text-sm mt-1 h-5"></p>
+                <div id="minigameOverlay" class="absolute inset-0 z-30 bg-slate-900/98 backdrop-blur-xl hidden flex flex-col items-center justify-center p-4">
+                    <div class="text-center mb-8">
+                        <i class="fa-solid fa-shield-halved text-6xl text-yellow-500 mb-4"></i>
+                        <h2 class="text-3xl font-black text-white uppercase tracking-tighter">System Firewall Triggered</h2>
+                        <p class="text-slate-400 mt-2">작은 수부터 차례대로 클릭하여 해킹을 방어하세요!</p>
+                        <p id="mgErrorTxt" class="text-red-500 font-bold mt-2 h-6"></p>
                     </div>
-                    <div id="mgContainer" class="minigame-grid w-full max-w-md"></div>
+                    <div id="mgContainer" class="minigame-grid w-full max-w-lg"></div>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- 5. Game End Screen -->
-    <div id="endScreen" class="fixed inset-0 z-50 bg-slate-900/95 hidden flex-col items-center justify-center backdrop-blur-md">
-        <i class="fa-solid fa-trophy text-7xl text-yellow-500 mb-4"></i>
-        <h1 class="text-6xl font-black text-white mb-2">WINNER : <span id="winTeamName" class="text-yellow-400">-</span></h1>
-        <p class="text-xl text-slate-300 mb-10">우승을 축하합니다!</p>
-        <button onclick="location.reload()" class="bg-slate-700 hover:bg-slate-600 px-8 py-3 rounded-lg text-white font-bold transition-all">로비로 돌아가기</button>
+    <div id="endScreen" class="fixed inset-0 z-50 bg-slate-950/98 hidden flex-col items-center justify-center backdrop-blur-xl">
+        <div class="relative mb-12">
+            <i class="fa-solid fa-trophy text-9xl text-yellow-500 drop-shadow-[0_0_50px_rgba(234,179,8,0.7)] animate-bounce"></i>
+        </div>
+        <h1 class="text-7xl font-black text-white mb-4 uppercase tracking-tighter">WINNER : <span id="winTeamName" class="text-yellow-400">-</span></h1>
+        <p class="text-2xl text-slate-400 mb-16 tracking-widest">RAECING CHALLENGE COMPLETE</p>
+        <button onclick="location.reload()" class="bg-blue-600 hover:bg-blue-500 px-12 py-5 rounded-2xl text-white text-2xl font-black transition-all shadow-2xl">LOBBY (RETURN)</button>
     </div>
 
     <script type="module">
@@ -334,10 +365,11 @@
         const PLAYERS_COL_PATH = `artifacts/${appId}/public/data/players`;
         
         let userId, myDocRef, gameDocRef = doc(db, GAME_DOC_PATH);
-        let myData = { nickname: "", team: null, score: 0, solved: 0, isAdmin: false };
+        // Track detailed solved counts
+        let myData = { nickname: "", team: null, score: 0, solvedG: 0, solvedY: 0, solvedR: 0, isAdmin: false };
         let gameState = { status: 'waiting', distances: { 1:0, 2:0, 3:0, 4:0, 5:0 }, m40: null, m80: null };
         let playersMap = {}, teamCounts = { 1:0, 2:0, 3:0, 4:0, 5:0 };
-        let currentProblem, currentInput = "", mgTargets = [], mgIdx = 0, mgCleared = false;
+        let currentProblem, currentInput = "", mgTargets = [], mgIdx = 0, mgCleared = false, currentCardLevel = "";
         let bgm = document.getElementById('racingBgm'), isSoundOn = true;
 
         const teamColors = {
@@ -370,13 +402,14 @@
                     if (!user) return;
                     userId = user.uid;
                     myDocRef = doc(db, PLAYERS_COL_PATH, userId);
+                    
                     await setDoc(gameDocRef, { status: 'waiting', distances: { 1:0, 2:0, 3:0, 4:0, 5:0 }, m40: null, m80: null }, { merge: true });
+                    
                     onSnapshot(gameDocRef, snap => snap.exists() && handleGameStateUpdate(snap.data()));
                     onSnapshot(collection(db, PLAYERS_COL_PATH), snap => {
                         playersMap = {}; snap.forEach(d => { playersMap[d.id] = d.data(); });
                         if(myData.isAdmin) updateAdminPlayerList();
                         updateTeamCountsUI();
-                        // 내 닉네임이 강제로 변경된 경우 감지
                         if(playersMap[userId] && playersMap[userId].nickname !== myData.nickname) {
                             myData.nickname = playersMap[userId].nickname;
                             if(document.getElementById('myInfoName')) document.getElementById('myInfoName').innerText = myData.nickname;
@@ -417,6 +450,7 @@
             const nn = document.getElementById('nicknameInput').value.trim();
             if(!nn || !myData.team) return showToast("이름 입력과 차량 선택을 완료해주세요!");
             myData.nickname = nn;
+            myData.solvedG = 0; myData.solvedY = 0; myData.solvedR = 0;
             try {
                 if(isSoundOn) bgm.play().catch(()=>{});
                 await setDoc(myDocRef, myData);
@@ -425,9 +459,16 @@
                 document.getElementById('rulesToggleBtn').classList.remove('hidden');
                 document.getElementById('myInfoName').innerText = myData.nickname;
                 document.getElementById('myInfoTeamBadge').innerText = teamColors[myData.team].name;
+                updateStatsUI();
                 openRules();
             } catch(e) { console.error(e); }
         };
+
+        function updateStatsUI() {
+            document.getElementById('mySolvedGreenTxt').innerText = myData.solvedG;
+            document.getElementById('mySolvedYellowTxt').innerText = myData.solvedY;
+            document.getElementById('mySolvedRedTxt').innerText = myData.solvedR;
+        }
 
         window.toggleAdminLogin = () => {
             document.getElementById('playerEntryMode').classList.toggle('hidden');
@@ -447,16 +488,13 @@
         window.resetGame = () => updateDoc(gameDocRef, { status: 'waiting', distances: { 1:0, 2:0, 3:0, 4:0, 5:0 }, m40: null, m80: null, winner: null });
         window.startGame = () => updateDoc(gameDocRef, { status: 'playing' });
         
-        // 참가자 명단 초기화 (유령 데이터 삭제)
         window.resetPlayers = async () => {
             if(!confirm("모든 참가자 명단과 접속 정보를 초기화하시겠습니까?")) return;
             const snap = await getDocs(collection(db, PLAYERS_COL_PATH));
-            const batch = [];
             snap.forEach(d => deleteDoc(doc(db, PLAYERS_COL_PATH, d.id)));
-            showToast("모든 참가자 데이터가 삭제되었습니다.");
+            showToast("모든 참가자 데이터가 초기화되었습니다.");
         };
 
-        // 관리자용 닉네임 수정 기능
         window.adminChangeNickname = async (uid, oldName) => {
             const newName = prompt(`'${oldName}'님의 새로운 닉네임을 입력하세요:`, oldName);
             if(newName && newName.trim() !== "" && newName !== oldName) {
@@ -468,11 +506,9 @@
         function updateAdminPlayerList() {
             const list = document.getElementById('adminPlayerList');
             list.innerHTML = '';
-            let count = 0;
             Object.keys(playersMap).forEach(uid => {
                 const p = playersMap[uid];
                 if(p.isAdmin) return;
-                count++;
                 const div = document.createElement('div');
                 div.className = 'bg-slate-700 p-3 rounded mb-2 flex justify-between items-center border border-slate-600';
                 div.innerHTML = `
@@ -480,11 +516,16 @@
                         <span class="font-bold text-white">${p.nickname}</span>
                         <button onclick="adminChangeNickname('${uid}', '${p.nickname}')" class="text-slate-400 hover:text-yellow-400 text-xs"><i class="fa-solid fa-pen"></i></button>
                     </div>
-                    <span class="text-[10px] px-2 py-1 bg-slate-800 rounded font-bold ${teamColors[p.team]?.text}">${teamColors[p.team]?.name}</span>
+                    <div class="flex gap-2">
+                        <span class="text-[9px] bg-slate-800 px-2 py-0.5 rounded text-emerald-400 border border-emerald-900">G:${p.solvedG||0}</span>
+                        <span class="text-[9px] bg-slate-800 px-2 py-0.5 rounded text-yellow-400 border border-yellow-900">Y:${p.solvedY||0}</span>
+                        <span class="text-[9px] bg-slate-800 px-2 py-0.5 rounded text-rose-400 border border-rose-900">R:${p.solvedR||0}</span>
+                        <span class="text-[10px] px-2 py-1 bg-slate-900 rounded font-bold ${teamColors[p.team]?.text}">${teamColors[p.team]?.name}</span>
+                    </div>
                 `;
                 list.appendChild(div);
             });
-            document.getElementById('adminPlayerCount').innerText = count;
+            document.getElementById('adminPlayerCount').innerText = Object.values(playersMap).filter(p=>!p.isAdmin).length;
         }
 
         function generateProblem(lv) {
@@ -510,7 +551,7 @@
                 currentProblem = generateProblem(lv); currentInput = ""; currentCardLevel = lv;
                 document.getElementById('cardSelectionView').classList.add('hidden');
                 document.getElementById('problemSolvingView').classList.remove('hidden');
-                document.getElementById('probCategory').innerText = lv==='green'?'초급':lv==='yellow'?'중급':'고급';
+                document.getElementById('probCategory').innerText = lv==='green'?'초급 (항과 계수)':lv==='yellow'?'중급 (정수 연산)':'고급 (소수 연산)';
                 document.getElementById('probText').innerText = currentProblem.q;
                 document.getElementById('answerDisplay').innerText = "";
                 inner.parentElement.classList.remove('flipped');
@@ -518,17 +559,31 @@
         };
 
         window.backToCards = () => { document.getElementById('problemSolvingView').classList.add('hidden'); document.getElementById('cardSelectionView').classList.remove('hidden'); };
-        window.typeKey = (k) => { if(k==='C') currentInput=""; else currentInput+=k; document.getElementById('answerDisplay').innerText = currentInput; };
+        window.typeKey = (k) => { if(k==='C') currentInput=""; else if(currentInput.length < 15) currentInput+=k; document.getElementById('answerDisplay').innerText = currentInput; };
         
         window.submitAnswer = async () => {
             if(currentInput.replace(/\s/g,'') === currentProblem.a.replace(/\s/g,'')) {
                 let d = currentCardLevel==='green'?1:currentCardLevel==='yellow'?3:6;
                 if(gameState.m80 === myData.team) d = currentCardLevel==='yellow'?2:currentCardLevel==='red'?4:d;
-                myData.score += (d*10); myData.solved++;
-                document.getElementById('myScoreTxt').innerText = myData.score;
-                await updateDoc(myDocRef, { score: myData.score, solved: myData.solved });
+                
+                // Track breakdown
+                if(currentCardLevel==='green') myData.solvedG++;
+                else if(currentCardLevel==='yellow') myData.solvedY++;
+                else if(currentCardLevel==='red') myData.solvedR++;
+                
+                myData.score += (d*10); 
+                updateStatsUI();
+                
+                await updateDoc(myDocRef, { 
+                    score: myData.score, 
+                    solvedG: myData.solvedG, 
+                    solvedY: myData.solvedY, 
+                    solvedR: myData.solvedR 
+                });
+
                 const distKey = `distances.${myData.team}`;
                 await updateDoc(gameDocRef, { [distKey]: increment(d) });
+                
                 let curD = (gameState.distances[myData.team] || 0) + d;
                 if(curD >= 40 && !gameState.m40) await updateDoc(gameDocRef, { m40: myData.team });
                 if(curD >= 80 && !gameState.m80) await updateDoc(gameDocRef, { m80: myData.team });
@@ -571,9 +626,13 @@
             if(data.status === 'playing') {
                 document.getElementById('waitStartOverlay').classList.add('hidden');
                 if(data.m40 === myData.team && !mgCleared) showMinigame();
-                document.getElementById('playArea').className = (data.m80 === myData.team) ? "relative p-4 penalty-screen" : "relative p-4";
+                document.getElementById('playArea').className = (data.m80 === myData.team) ? "relative p-4 penalty-screen overflow-hidden flex flex-col" : "relative p-4 overflow-hidden flex flex-col";
                 document.getElementById('localPenaltyInfo').innerText = (data.m80 === myData.team) ? "엔진 출력 저하 페널티 발생!" : "엔진 상태 정상";
                 if(oldStatus !== 'playing') { document.getElementById('cardSelectionView').classList.remove('hidden'); mgCleared = false; }
+            } else if (data.status === 'waiting') {
+                document.getElementById('waitStartOverlay').classList.remove('hidden');
+                document.getElementById('cardSelectionView').classList.add('hidden');
+                document.getElementById('problemSolvingView').classList.add('hidden');
             }
             if(data.status === 'ended' && data.winner) {
                 document.getElementById('endScreen').classList.replace('hidden', 'flex');
