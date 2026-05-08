@@ -2,7 +2,6 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <!-- Viewport settings for mobile/tablet landscape optimization -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, landscape">
     <title>일차식 레이싱 대결</title>
     
@@ -13,7 +12,7 @@
     <style>
         body {
             font-family: 'Noto Sans KR', sans-serif;
-            background-color: #0f172a; /* slate-900 */
+            background-color: #0f172a;
             color: #f8fafc;
             overflow: hidden;
             touch-action: none;
@@ -23,118 +22,41 @@
 
         .race-font { font-family: 'Orbitron', sans-serif; }
         
-        /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.1); }
         ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.3); border-radius: 10px; }
 
-        .card-container {
-            perspective: 1000px;
-        }
+        .card-container { perspective: 1000px; }
         .card-inner {
-            position: relative;
-            width: 100%;
-            height: 100%;
+            position: relative; width: 100%; height: 100%;
             transition: transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
             transform-style: preserve-3d;
         }
-        .card-container.flipped .card-inner {
-            transform: rotateY(180deg);
-        }
-        .card-front, .card-back {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            backface-visibility: hidden;
-            border-radius: 12px;
-        }
-        .card-back {
-            transform: rotateY(180deg);
-            background: #1e293b;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            border: 2px solid #cbd5e1;
-            padding: 1rem;
-            text-align: center;
-        }
+        .card-container.flipped .card-inner { transform: rotateY(180deg); }
+        .card-front, .card-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 12px; }
+        .card-back { transform: rotateY(180deg); background: #1e293b; display: flex; flex-direction: column; justify-content: center; align-items: center; border: 2px solid #cbd5e1; padding: 1rem; text-align: center; }
 
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
-            20%, 40%, 60%, 80% { transform: translateX(10px); }
-        }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); } 20%, 40%, 60%, 80% { transform: translateX(10px); } }
         .animate-shake { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both; }
         
-        @keyframes pulse-red {
-            0%, 100% { box-shadow: inset 0 0 0px 0px rgba(239, 68, 68, 0); }
-            50% { box-shadow: inset 0 0 50px 10px rgba(239, 68, 68, 0.5); }
-        }
+        @keyframes pulse-red { 0%, 100% { box-shadow: inset 0 0 0px 0px rgba(239, 68, 68, 0); } 50% { box-shadow: inset 0 0 50px 10px rgba(239, 68, 68, 0.5); } }
         .penalty-screen { animation: pulse-red 1s infinite; }
 
-        /* Track Styles : Dynamically scaled to match 120 distance perfectly (10 distance per block = 8.333%) */
-        .track-lane {
-            background: repeating-linear-gradient(90deg, #334155 0%, #334155 4.166%, #1e293b 4.166%, #1e293b 8.333%);
-            border-bottom: 2px dashed #64748b;
-        }
-        
-        .car-icon {
-            transition: left 0.5s ease-out;
-            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));
-            /* Ensure the icon center aligns exactly with the % position */
-            transform: translate(-50%, -50%); 
-        }
+        .track-lane { background: repeating-linear-gradient(90deg, #334155 0%, #334155 4.166%, #1e293b 4.166%, #1e293b 8.333%); border-bottom: 2px dashed #64748b; }
+        .car-icon { transition: left 0.5s ease-out; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5)); transform: translate(-50%, -50%); }
 
-        .key-btn {
-            background: linear-gradient(180deg, #334155 0%, #1e293b 100%);
-            border: 1px solid #475569;
-            border-bottom-width: 4px;
-            border-radius: 8px;
-            color: white;
-            font-size: 1.25rem;
-            font-weight: bold;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transition: all 0.1s;
-        }
-        .key-btn:active {
-            transform: translateY(3px);
-            border-bottom-width: 1px;
-            background: #1e293b;
-        }
+        .key-btn { background: linear-gradient(180deg, #334155 0%, #1e293b 100%); border: 1px solid #475569; border-bottom-width: 4px; border-radius: 8px; color: white; font-size: 1.25rem; font-weight: bold; display: flex; justify-content: center; align-items: center; transition: all 0.1s; cursor: pointer; }
+        .key-btn:active { transform: translateY(3px); border-bottom-width: 1px; background: #1e293b; }
         .key-action { background: linear-gradient(180deg, #0ea5e9 0%, #0284c7 100%); border-color: #0369a1; }
         .key-clear { background: linear-gradient(180deg, #ef4444 0%, #dc2626 100%); border-color: #b91c1c; }
 
-        .minigame-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 10px;
-        }
-        .mg-btn {
-            background: #f59e0b;
-            color: #000;
-            font-weight: 900;
-            font-size: 1.5rem;
-            border-radius: 8px;
-            padding: 15px 0;
-            box-shadow: 0 4px 0 #b45309;
-            transition: transform 0.1s, box-shadow 0.1s;
-        }
-        .mg-btn:active {
-            transform: translateY(4px);
-            box-shadow: 0 0 0 #b45309;
-        }
+        .minigame-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+        .mg-btn { background: #f59e0b; color: #000; font-weight: 900; font-size: 1.5rem; border-radius: 8px; padding: 15px 0; box-shadow: 0 4px 0 #b45309; transition: transform 0.1s; cursor: pointer; }
+        .mg-btn:active { transform: translateY(4px); box-shadow: 0 0 0 #b45309; }
         .mg-hidden { opacity: 0; pointer-events: none; }
     </style>
 </head>
 <body class="flex flex-col w-screen h-screen">
-
-    <!-- Game Rules Toggle Button -->
-    <button onclick="openRules()" id="rulesToggleBtn" class="fixed top-4 left-4 z-50 bg-slate-800/80 text-white p-3 rounded-full border border-slate-600 shadow-lg hover:bg-slate-700 transition-colors hidden font-bold text-sm">
-        <i class="fa-solid fa-book mr-2"></i>게임 규칙
-    </button>
 
     <!-- Game Rules Modal -->
     <div id="rulesModal" class="fixed inset-0 z-[60] bg-slate-900/90 backdrop-blur-md hidden flex-col items-center justify-center p-4">
@@ -146,8 +68,8 @@
                 <li><span class="inline-block w-3 h-3 rounded-full bg-yellow-400 mr-2"></span><span class="text-yellow-400 font-bold">중급(노랑)</span>: 정수 계수 단항식 계산 (정답 시 <span class="text-yellow-400 font-bold">+3칸</span>)</li>
                 <li><span class="inline-block w-3 h-3 rounded-full bg-red-400 mr-2"></span><span class="text-red-400 font-bold">고급(빨강)</span>: 분수/소수 계수 일차식 계산 (정답 시 <span class="text-yellow-400 font-bold">+6칸</span>)</li>
                 <li class="mt-4 text-base text-slate-400 border-t border-slate-700 pt-4">- 가장 먼저 <span class="text-yellow-400 font-bold">120칸</span>을 돌파하는 팀이 우승합니다.</li>
-                <li class="text-base text-slate-400">- <span class="text-yellow-500 font-bold">40칸 도달 이벤트</span>: 숫자 순서대로 누르기 해킹 방어 미니게임 발생 (실패 시 3초 정지)</li>
-                <li class="text-base text-slate-400">- <span class="text-red-500 font-bold">80칸 도달 이벤트</span>: 가장 먼저 도달한 팀에게 엔진 출력 저하 페널티 (이후 전진 칸수 감소)</li>
+                <li class="text-base text-slate-400">- <span class="text-yellow-500 font-bold">40칸 도달 이벤트</span>: 숫자 순서대로 누르기 미니게임 발생 (실패 시 3초 정지)</li>
+                <li class="text-base text-slate-400">- <span class="text-red-500 font-bold">80칸 도달 이벤트</span>: 선두 팀 엔진 출력 저하 페널티 (획득 거리 감소)</li>
             </ul>
             <div class="mt-8 text-center">
                 <button onclick="closeRules()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-8 rounded-lg transition-colors">확인</button>
@@ -155,12 +77,12 @@
         </div>
     </div>
 
-    <!-- Background Music -->
-    <audio id="racingBgm" loop>
-        <source src="bgm.mp3" type="audio/mpeg">
-    </audio>
+    <!-- UI Alert Modal (Simple Toast) -->
+    <div id="toastAlert" class="fixed top-10 left-1/2 -translate-x-1/2 z-[70] bg-red-600 text-white px-6 py-3 rounded-full font-bold shadow-2xl hidden animate-bounce">
+        <i class="fa-solid fa-triangle-exclamation mr-2"></i> <span id="toastMsg">알림 메시지</span>
+    </div>
 
-    <!-- Sound Toggle Button -->
+    <audio id="racingBgm" loop><source src="bgm.mp3" type="audio/mpeg"></audio>
     <button onclick="toggleSound()" id="soundToggleBtn" class="fixed top-4 right-4 z-50 bg-slate-800/80 text-white p-3 rounded-full border border-slate-600 shadow-lg hover:bg-slate-700 transition-colors">
         <i class="fa-solid fa-volume-high" id="soundIcon"></i>
     </button>
@@ -174,14 +96,12 @@
     <!-- 2. Login / Lobby Screen -->
     <div id="lobbyScreen" class="fixed inset-0 z-40 hidden flex-col items-center justify-center bg-[url('https://images.unsplash.com/photo-1547447134-cd3f5c716030?q=80&w=1964&auto=format&fit=crop')] bg-cover bg-center">
         <div class="absolute inset-0 bg-slate-900/85 backdrop-blur-sm"></div>
-        
         <div class="z-10 bg-slate-800/90 p-8 rounded-2xl border border-slate-600 shadow-2xl max-w-4xl w-full flex flex-col">
             <div class="flex justify-between items-center mb-6">
                 <h1 class="text-4xl race-font font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400 tracking-wider">일차식 레이싱 대결</h1>
                 <button onclick="toggleAdminLogin()" class="text-xs text-slate-500 hover:text-white"><i class="fa-solid fa-user-shield"></i> ADMIN</button>
             </div>
 
-            <!-- Player Entry Mode -->
             <div id="playerEntryMode">
                 <div class="mb-6 w-1/2 mx-auto">
                     <label class="block text-slate-400 mb-2 font-bold text-center">참가자 이름 (닉네임)</label>
@@ -190,7 +110,6 @@
 
                 <label class="block text-slate-400 mb-2 font-bold text-center">차량 선택 (팀 결정)</label>
                 <div class="grid grid-cols-5 gap-3 mb-8">
-                    <!-- Unique Vehicle Selections -->
                     <button onclick="selectTeam(1)" id="teamBtn1" class="team-sel-btn flex flex-col items-center justify-center p-4 rounded-xl border-2 border-slate-600 hover:bg-slate-700 opacity-50 transition-all">
                         <i class="fa-solid fa-fighter-jet fa-rotate-90 text-4xl text-red-500 mb-3"></i>
                         <span class="font-bold text-xs text-slate-300">스피드스터</span>
@@ -218,23 +137,18 @@
                     </button>
                 </div>
 
-                <button onclick="joinGame()" class="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-bold text-xl p-4 rounded-xl shadow-[0_0_15px_rgba(59,130,246,0.5)] transition-all">
-                    경기장 입장 (JOIN)
-                </button>
+                <button onclick="joinGame()" class="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-bold text-xl p-4 rounded-xl shadow-lg transition-all">경기장 입장 (JOIN)</button>
                 <p id="joinErrorTxt" class="text-red-400 text-sm font-bold mt-3 text-center h-5"></p>
             </div>
 
-            <!-- Admin Entry Mode -->
             <div id="adminEntryMode" class="hidden">
                 <div class="mb-6 text-center">
                     <i class="fa-solid fa-user-shield text-5xl text-yellow-500 mb-4"></i>
-                    <p class="text-slate-300 mb-4">관리자 모드로 접속합니다.</p>
+                    <p class="text-slate-300 mb-4">관리자 화면으로 접속합니다.</p>
                     <input type="password" id="adminPasswordInput" class="w-2/3 mx-auto bg-slate-950 border border-slate-600 rounded p-3 text-white text-lg text-center focus:outline-none focus:border-yellow-500 transition-colors" placeholder="비밀번호 입력">
                     <p id="adminErrorTxt" class="text-red-400 text-sm font-bold mt-2 h-5"></p>
                 </div>
-                <button onclick="joinAsAdmin()" class="w-full bg-yellow-600 hover:bg-yellow-500 text-white font-bold text-xl p-4 rounded-xl shadow-[0_0_15px_rgba(202,138,4,0.5)] transition-all">
-                    관리자 패널 열기
-                </button>
+                <button onclick="joinAsAdmin()" class="w-full bg-yellow-600 hover:bg-yellow-500 text-white font-bold text-xl p-4 rounded-xl shadow-lg transition-all">관리자 패널 열기</button>
             </div>
         </div>
     </div>
@@ -243,15 +157,15 @@
     <div id="adminScreen" class="fixed inset-0 z-30 hidden bg-slate-900 p-6 flex-col">
         <div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-700">
             <h1 class="text-3xl race-font font-black text-yellow-500"><i class="fa-solid fa-sliders"></i> 관리자 화면</h1>
-            <div class="flex gap-4">
-                <button onclick="resetGame()" class="bg-red-600 hover:bg-red-500 px-6 py-2 rounded font-bold transition-colors">RESET RACE</button>
-                <button onclick="startGame()" id="adminStartBtn" class="bg-green-600 hover:bg-green-500 px-8 py-2 rounded font-bold transition-colors shadow-[0_0_15px_rgba(22,163,74,0.5)]">START RACE</button>
+            <div class="flex gap-3">
+                <button onclick="resetPlayers()" class="bg-slate-600 hover:bg-slate-500 px-4 py-2 rounded font-bold transition-colors text-sm">참가자 명단 초기화</button>
+                <button onclick="resetGame()" class="bg-red-600 hover:bg-red-500 px-6 py-2 rounded font-bold transition-colors text-sm">레이스 리셋</button>
+                <button onclick="startGame()" id="adminStartBtn" class="bg-green-600 hover:bg-green-500 px-8 py-2 rounded font-bold transition-colors shadow-lg">START RACE</button>
             </div>
         </div>
 
-        <!-- Admin Race Track View -->
         <div class="w-full bg-slate-800 rounded-xl p-4 border border-slate-700 mb-6 relative h-48 overflow-hidden px-10">
-            <h3 class="text-xs text-slate-400 font-bold mb-2 absolute top-2 left-4">LIVE TRACK MONITOR</h3>
+            <h3 class="text-xs text-slate-400 font-bold mb-2 absolute top-2 left-4 tracking-widest">LIVE TRACK MONITOR</h3>
             <div class="relative w-full h-full flex flex-col justify-evenly mt-3">
                 <div class="absolute left-0 right-0 top-0 bottom-0 pointer-events-none z-0">
                     <div class="absolute left-0 top-0 bottom-0 w-[2px] bg-white/20"></div>
@@ -268,26 +182,24 @@
         </div>
 
         <div class="flex-1 grid grid-cols-2 gap-8 overflow-hidden">
-            <div class="bg-slate-800 rounded-xl p-6 flex flex-col">
+            <div class="bg-slate-800 rounded-xl p-6 flex flex-col border border-slate-700">
                 <h2 class="text-xl text-slate-400 font-bold mb-4">현재 게임 상태</h2>
-                <div class="text-3xl font-black race-font mb-4 text-white" id="adminStatusTxt">WAITING</div>
-                
-                <h2 class="text-xl text-slate-400 font-bold mb-4 mt-6">이벤트 트리거 현황</h2>
-                <div class="grid grid-cols-2 gap-4">
+                <div class="text-3xl font-black race-font mb-4 text-white uppercase" id="adminStatusTxt">WAITING</div>
+                <div class="grid grid-cols-2 gap-4 mt-4">
                     <div class="bg-slate-700 p-4 rounded-lg">
-                        <p class="text-sm text-slate-400">40도달 (미니게임)</p>
+                        <p class="text-xs text-slate-400 mb-1">40km 이벤트 소유팀</p>
                         <p class="text-xl font-bold text-yellow-400" id="adminM40Txt">미발동</p>
                     </div>
                     <div class="bg-slate-700 p-4 rounded-lg">
-                        <p class="text-sm text-slate-400">80도달 (페널티)</p>
+                        <p class="text-xs text-slate-400 mb-1">80km 페널티 소유팀</p>
                         <p class="text-xl font-bold text-red-400" id="adminM80Txt">미발동</p>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-slate-800 rounded-xl p-6 flex flex-col overflow-hidden">
+            <div class="bg-slate-800 rounded-xl p-6 flex flex-col overflow-hidden border border-slate-700">
                 <div class="flex justify-between items-end mb-4">
-                    <h2 class="text-xl text-slate-400 font-bold">접속중인 플레이어</h2>
+                    <h2 class="text-xl text-slate-400 font-bold">접속 중인 참가자</h2>
                     <span class="text-sm bg-blue-900 text-blue-200 px-3 py-1 rounded-full"><span id="adminPlayerCount">0</span> 명</span>
                 </div>
                 <div class="flex-1 overflow-y-auto pr-2" id="adminPlayerList">
@@ -299,233 +211,110 @@
 
     <!-- 4. Main Game Screen -->
     <div id="gameScreen" class="flex-1 flex flex-col hidden h-full bg-slate-900">
-        
-        <!-- TOP: Race Track Area (40% height) -->
-        <div class="h-[40%] bg-slate-800 relative shadow-[inset_0_-10px_20px_rgba(0,0,0,0.3)] border-b-4 border-slate-700 py-4 px-12">
-            
-            <!-- Track Guide Container (Ensures accurate 0-100% width) -->
+        <div class="h-[40%] bg-slate-800 relative shadow-inner border-b-4 border-slate-700 py-4 px-12">
             <div class="relative w-full h-full flex flex-col justify-evenly">
-                <!-- Milestones (Background) -->
                 <div class="absolute left-0 right-0 top-0 bottom-0 pointer-events-none z-0">
                     <div class="absolute left-0 top-0 bottom-0 w-[2px] bg-white/20"></div>
-                    <!-- 40km Milestone (33.33% of 120km) -->
-                    <div class="absolute left-[33.33%] top-0 bottom-0 w-[2px] bg-yellow-500/80 flex flex-col justify-end pb-1">
-                        <span class="text-[10px] text-yellow-500 font-bold -ml-3 mb-1 bg-slate-800/80 px-1 rounded">40km</span>
-                    </div>
-                    <!-- 80km Milestone (66.66% of 120km) -->
-                    <div class="absolute left-[66.66%] top-0 bottom-0 w-[2px] bg-red-500/80 flex flex-col justify-end pb-1">
-                        <span class="text-[10px] text-red-500 font-bold -ml-3 mb-1 bg-slate-800/80 px-1 rounded">80km</span>
-                    </div>
-                    <!-- 120km Goal Line (100%) -->
-                    <div class="absolute left-[100%] top-0 bottom-0 w-4 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCI+PHJlY3Qgd2lkdGg9IjEwIiBoZWlnaHQ9IjEwIiBmaWxsPSJ3aGl0ZSIvPjxyZWN0IHg9IjEwIiB5PSIxMCIgd2lkdGg9IjEwIiBoZWlnaHQ9IjEwIiBmaWxsPSJ3aGl0ZSIvPjwvc3ZnPg==')] border-l-2 border-yellow-400 flex flex-col justify-end pb-1">
-                        <span class="text-[10px] text-white font-bold ml-5 mb-1 whitespace-nowrap drop-shadow-md">FINISH</span>
-                    </div>
+                    <div class="absolute left-[33.33%] top-0 bottom-0 w-[2px] bg-yellow-500/80 flex flex-col justify-end pb-1"><span class="text-[10px] text-yellow-500 font-bold -ml-3 mb-1 bg-slate-800/80 px-1 rounded">40km</span></div>
+                    <div class="absolute left-[66.66%] top-0 bottom-0 w-[2px] bg-red-500/80 flex flex-col justify-end pb-1"><span class="text-[10px] text-red-500 font-bold -ml-3 mb-1 bg-slate-800/80 px-1 rounded">80km</span></div>
+                    <div class="absolute left-[100%] top-0 bottom-0 w-4 bg-yellow-500 border-l-2 border-white/50"></div>
                 </div>
-
-                <!-- Lanes 1-5 -->
-                <div class="track-lane h-8 relative flex items-center w-full z-10">
-                    <span class="absolute -left-6 text-xs font-bold text-slate-500 race-font">1</span>
-                    <i id="car1" class="fa-solid fa-fighter-jet fa-rotate-90 text-2xl text-red-500 car-icon absolute top-1/2" style="left: 0%;"></i>
-                </div>
-                <div class="track-lane h-8 relative flex items-center w-full z-10">
-                    <span class="absolute -left-6 text-xs font-bold text-slate-500 race-font">2</span>
-                    <i id="car2" class="fa-solid fa-truck-monster text-2xl text-blue-500 car-icon absolute top-1/2" style="left: 0%;"></i>
-                </div>
-                <div class="track-lane h-8 relative flex items-center w-full z-10">
-                    <span class="absolute -left-6 text-xs font-bold text-slate-500 race-font">3</span>
-                    <i id="car3" class="fa-solid fa-space-shuttle fa-rotate-90 text-2xl text-green-500 car-icon absolute top-1/2" style="left: 0%;"></i>
-                </div>
-                <div class="track-lane h-8 relative flex items-center w-full z-10">
-                    <span class="absolute -left-6 text-xs font-bold text-slate-500 race-font">4</span>
-                    <i id="car4" class="fa-solid fa-truck-pickup text-2xl text-yellow-500 car-icon absolute top-1/2" style="left: 0%;"></i>
-                </div>
-                <div class="track-lane h-8 relative flex items-center w-full z-10">
-                    <span class="absolute -left-6 text-xs font-bold text-slate-500 race-font">5</span>
-                    <i id="car5" class="fa-solid fa-rocket fa-rotate-90 text-2xl text-purple-500 car-icon absolute top-1/2" style="left: 0%;"></i>
-                </div>
+                <div class="track-lane h-8 relative flex items-center w-full z-10"><i id="car1" class="fa-solid fa-fighter-jet fa-rotate-90 text-2xl text-red-500 car-icon absolute top-1/2" style="left: 0%;"></i></div>
+                <div class="track-lane h-8 relative flex items-center w-full z-10"><i id="car2" class="fa-solid fa-truck-monster text-2xl text-blue-500 car-icon absolute top-1/2" style="left: 0%;"></i></div>
+                <div class="track-lane h-8 relative flex items-center w-full z-10"><i id="car3" class="fa-solid fa-space-shuttle fa-rotate-90 text-2xl text-green-500 car-icon absolute top-1/2" style="left: 0%;"></i></div>
+                <div class="track-lane h-8 relative flex items-center w-full z-10"><i id="car4" class="fa-solid fa-truck-pickup text-2xl text-yellow-500 car-icon absolute top-1/2" style="left: 0%;"></i></div>
+                <div class="track-lane h-8 relative flex items-center w-full z-10"><i id="car5" class="fa-solid fa-rocket fa-rotate-90 text-2xl text-purple-500 car-icon absolute top-1/2" style="left: 0%;"></i></div>
             </div>
         </div>
 
-        <!-- BOTTOM: Interaction Area (60% height) -->
         <div class="h-[60%] flex relative">
+            <div id="waitStartOverlay" class="absolute inset-0 z-20 bg-slate-900/90 backdrop-blur-sm flex flex-col items-center justify-center">
+                <i class="fa-solid fa-flag-checkered text-5xl text-slate-400 mb-4 animate-bounce"></i>
+                <h2 class="text-2xl font-bold text-white tracking-widest">관리자의 출발 신호를 대기 중입니다</h2>
+            </div>
             
-            <!-- Left Info Panel (Small) -->
             <div class="w-1/4 bg-slate-900 border-r border-slate-700 p-4 flex flex-col justify-between">
                 <div>
-                    <p class="text-slate-400 text-sm font-bold mb-1">드라이버 정보</p>
+                    <p class="text-slate-400 text-xs font-bold mb-1 uppercase tracking-widest">Driver Info</p>
                     <p class="text-xl font-bold truncate" id="myInfoName">-</p>
-                    <div class="mt-2 inline-block px-3 py-1 rounded bg-slate-800 text-sm border border-slate-600" id="myInfoTeamBadge">
-                        TEAM -
-                    </div>
+                    <div class="mt-2 inline-block px-3 py-1 rounded bg-slate-800 text-sm border border-slate-600 font-bold uppercase tracking-tighter" id="myInfoTeamBadge">TEAM -</div>
                 </div>
-                
                 <div class="bg-slate-800 p-3 rounded-lg border border-slate-700">
                     <p class="text-xs text-slate-400 mb-1">획득 스코어</p>
-                    <p class="text-2xl font-black text-emerald-400 race-font" id="myScoreTxt">0</p>
-                    <p class="text-xs text-slate-400 mt-2 mb-1">해결한 문제</p>
-                    <p class="text-xl font-bold text-blue-400 race-font" id="mySolvedTxt">0</p>
+                    <p class="text-3xl font-black text-emerald-400 race-font" id="myScoreTxt">0</p>
                 </div>
-
-                <!-- Event Status Info -->
-                <div class="text-xs mt-4" id="localPenaltyInfo">
-                    <p class="text-slate-500">엔진 상태 정상</p>
-                </div>
+                <div id="localPenaltyInfo" class="text-xs py-2 px-3 bg-slate-800 rounded border border-slate-700 text-slate-500">엔진 상태 정상</div>
             </div>
 
-            <!-- Right Main Play Area -->
             <div class="w-3/4 bg-slate-950 p-4 relative overflow-hidden flex flex-col" id="playArea">
-                
-                <!-- State: Waiting for start -->
-                <div id="waitStartOverlay" class="absolute inset-0 z-20 bg-slate-900/90 backdrop-blur-sm flex flex-col items-center justify-center">
-                    <i class="fa-solid fa-flag-checkered text-5xl text-slate-400 mb-4 animate-bounce"></i>
-                    <h2 class="text-2xl font-bold text-white tracking-widest">관리자의 출발 신호를 대기중입니다</h2>
-                </div>
-
-                <!-- View 1: Card Selection -->
                 <div id="cardSelectionView" class="w-full h-full flex flex-col items-center justify-center hidden">
-                    <h3 class="text-lg text-slate-300 font-bold mb-4">해킹할 시스템 코드를 선택하세요</h3>
+                    <h3 class="text-lg text-slate-300 font-bold mb-4">계산 난이도를 선택하세요</h3>
                     <div class="flex gap-4 md:gap-8 justify-center w-full max-w-2xl px-4 h-48 md:h-56">
-                        
                         <div class="flex-1 card-container cursor-pointer" onclick="selectCard('green')">
                             <div class="card-inner" id="cardInnerGreen">
-                                <div class="card-front bg-gradient-to-br from-emerald-500 to-green-600 shadow-[0_0_15px_rgba(16,185,129,0.3)] flex flex-col items-center justify-center border-2 border-green-400 hover:scale-105 transition-transform">
-                                    <i class="fa-solid fa-leaf text-4xl text-white mb-2"></i>
-                                    <h4 class="font-bold text-white text-lg">초급 (+1)</h4>
-                                </div>
+                                <div class="card-front bg-emerald-600 border-2 border-emerald-400 flex flex-col items-center justify-center"><i class="fa-solid fa-leaf text-4xl text-white mb-2"></i><h4 class="font-bold text-lg">초급 (+1)</h4></div>
                                 <div class="card-back"></div>
                             </div>
                         </div>
-
                         <div class="flex-1 card-container cursor-pointer" onclick="selectCard('yellow')">
                             <div class="card-inner" id="cardInnerYellow">
-                                <div class="card-front bg-gradient-to-br from-yellow-400 to-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.3)] flex flex-col items-center justify-center border-2 border-yellow-300 hover:scale-105 transition-transform">
-                                    <i class="fa-solid fa-bolt text-4xl text-white mb-2"></i>
-                                    <h4 class="font-bold text-white text-lg">중급 (+3)</h4>
-                                </div>
+                                <div class="card-front bg-yellow-500 border-2 border-yellow-300 flex flex-col items-center justify-center text-slate-900"><i class="fa-solid fa-bolt text-4xl mb-2"></i><h4 class="font-bold text-lg">중급 (+3)</h4></div>
                                 <div class="card-back"></div>
                             </div>
                         </div>
-
                         <div class="flex-1 card-container cursor-pointer" onclick="selectCard('red')">
                             <div class="card-inner" id="cardInnerRed">
-                                <div class="card-front bg-gradient-to-br from-red-500 to-rose-600 shadow-[0_0_15px_rgba(239,68,68,0.3)] flex flex-col items-center justify-center border-2 border-red-400 hover:scale-105 transition-transform">
-                                    <i class="fa-solid fa-fire text-4xl text-white mb-2"></i>
-                                    <h4 class="font-bold text-white text-lg">고급 (+6)</h4>
-                                </div>
+                                <div class="card-front bg-red-600 border-2 border-red-400 flex flex-col items-center justify-center"><i class="fa-solid fa-fire text-4xl text-white mb-2"></i><h4 class="font-bold text-lg">고급 (+6)</h4></div>
                                 <div class="card-back"></div>
                             </div>
                         </div>
-
                     </div>
                 </div>
 
-                <!-- View 2: Problem Solving -->
                 <div id="problemSolvingView" class="w-full h-full flex gap-4 hidden">
-                    <!-- Problem Display -->
                     <div class="flex-1 bg-slate-800 rounded-xl border border-slate-600 p-4 flex flex-col items-center justify-center relative">
-                        <button onclick="backToCards()" class="absolute top-3 left-3 text-slate-400 hover:text-white bg-slate-700 px-3 py-1 rounded text-sm"><i class="fa-solid fa-arrow-left"></i> 후퇴</button>
-                        
-                        <p class="text-sm text-blue-400 font-bold mb-2" id="probCategory">문제 유형</p>
-                        <div class="text-xl md:text-2xl font-bold text-center text-white mb-6 whitespace-pre-wrap px-8" id="probText">문제 텍스트</div>
-                        
-                        <!-- Input Display -->
-                        <div class="w-full max-w-sm bg-slate-900 border-2 border-blue-500 rounded-lg p-3 text-center min-h-[60px] flex items-center justify-center shadow-[0_0_15px_rgba(59,130,246,0.3)]">
+                        <button onclick="backToCards()" class="absolute top-3 left-3 text-slate-400 bg-slate-700 px-3 py-1 rounded text-sm hover:text-white">후퇴</button>
+                        <p id="probCategory" class="text-sm font-bold mb-2">문제</p>
+                        <div id="probText" class="text-2xl font-bold text-center text-white mb-6 whitespace-pre-wrap"></div>
+                        <div class="w-full max-w-sm bg-slate-900 border-2 border-blue-500 rounded-lg p-3 text-center min-h-[60px] flex items-center justify-center shadow-lg">
                             <span id="answerDisplay" class="text-3xl font-bold tracking-widest text-white"></span>
                             <span class="animate-pulse text-blue-500 ml-1">_</span>
                         </div>
                     </div>
-
-                    <!-- Custom Math Keypad -->
                     <div class="w-72 bg-slate-800 rounded-xl border border-slate-600 p-3 grid grid-cols-4 gap-2">
-                        <button class="key-btn" onclick="typeKey('1')">1</button>
-                        <button class="key-btn" onclick="typeKey('2')">2</button>
-                        <button class="key-btn" onclick="typeKey('3')">3</button>
-                        <button class="key-btn text-blue-400 text-2xl font-serif italic" onclick="typeKey('x')">x</button>
-                        
-                        <button class="key-btn" onclick="typeKey('4')">4</button>
-                        <button class="key-btn" onclick="typeKey('5')">5</button>
-                        <button class="key-btn" onclick="typeKey('6')">6</button>
-                        <button class="key-btn text-emerald-400 text-2xl" onclick="typeKey('+')">+</button>
-
-                        <button class="key-btn" onclick="typeKey('7')">7</button>
-                        <button class="key-btn" onclick="typeKey('8')">8</button>
-                        <button class="key-btn" onclick="typeKey('9')">9</button>
-                        <button class="key-btn text-emerald-400 text-3xl" onclick="typeKey('-')">-</button>
-
-                        <button class="key-btn key-clear" onclick="typeKey('C')">C</button>
-                        <button class="key-btn" onclick="typeKey('0')">0</button>
-                        <button class="key-btn text-emerald-400 text-xl font-black" onclick="typeKey('/')">/</button>
-                        <button class="key-btn key-action" onclick="submitAnswer()"><i class="fa-solid fa-paper-plane"></i></button>
+                        <button class="key-btn" onclick="typeKey('1')">1</button><button class="key-btn" onclick="typeKey('2')">2</button><button class="key-btn" onclick="typeKey('3')">3</button><button class="key-btn text-blue-400 italic" onclick="typeKey('x')">x</button>
+                        <button class="key-btn" onclick="typeKey('4')">4</button><button class="key-btn" onclick="typeKey('5')">5</button><button class="key-btn" onclick="typeKey('6')">6</button><button class="key-btn text-emerald-400" onclick="typeKey('+')">+</button>
+                        <button class="key-btn" onclick="typeKey('7')">7</button><button class="key-btn" onclick="typeKey('8')">8</button><button class="key-btn" onclick="typeKey('9')">9</button><button class="key-btn text-emerald-400" onclick="typeKey('-')">-</button>
+                        <button class="key-btn key-clear" onclick="typeKey('C')">C</button><button class="key-btn" onclick="typeKey('0')">0</button><button class="key-btn text-emerald-400" onclick="typeKey('/')">/</button><button class="key-btn key-action" onclick="submitAnswer()"><i class="fa-solid fa-paper-plane"></i></button>
                     </div>
                 </div>
 
-                <!-- Milestone 40 Minigame Overlay -->
                 <div id="minigameOverlay" class="absolute inset-0 z-30 bg-slate-900/95 backdrop-blur-md hidden flex-col items-center justify-center p-4">
                     <div class="text-center mb-6">
                         <i class="fa-solid fa-shield-virus text-5xl text-yellow-500 mb-2"></i>
                         <h2 class="text-2xl font-black text-white">시스템 해킹 방어</h2>
                         <p class="text-slate-300 mt-1">숫자를 <strong class="text-yellow-400">작은 수부터 차례대로</strong> 빠르게 누르세요!</p>
-                        <p class="text-red-400 text-sm mt-1" id="mgErrorTxt"></p>
+                        <p id="mgErrorTxt" class="text-red-400 text-sm mt-1 h-5"></p>
                     </div>
-                    
-                    <div class="minigame-grid w-full max-w-md" id="mgContainer">
-                        <!-- Buttons injected via JS -->
-                    </div>
+                    <div id="mgContainer" class="minigame-grid w-full max-w-md"></div>
                 </div>
-
             </div>
         </div>
     </div>
 
-    <!-- 5. Game End / Winner Screen -->
-    <div id="endScreen" class="fixed inset-0 z-50 bg-slate-900/95 flex-col items-center justify-center backdrop-blur-md hidden pb-10">
-        <h2 class="text-3xl text-slate-400 race-font tracking-widest mb-2 mt-10">RACE FINISHED</h2>
-        
-        <div class="text-center mb-10">
-            <i class="fa-solid fa-trophy text-7xl text-yellow-500 mb-4 drop-shadow-[0_0_20px_rgba(234,179,8,0.8)]"></i>
-            <h1 class="text-6xl font-black text-white mb-2">WINNER : <span id="winTeamName" class="text-yellow-400">TEAM 1</span></h1>
-            <p class="text-xl text-slate-300">우승을 축하합니다!</p>
-        </div>
-
-        <div class="w-full max-w-4xl px-8 flex gap-8">
-            <div class="flex-1 bg-slate-800 rounded-xl p-6 border border-slate-600">
-                <h3 class="text-xl text-yellow-400 font-bold mb-4 border-b border-slate-700 pb-2"><i class="fa-solid fa-users"></i> 우승팀 드라이버 명단</h3>
-                <ul id="winMembersList" class="space-y-2 max-h-48 overflow-y-auto text-lg text-white font-bold">
-                    <!-- populated via js -->
-                </ul>
-            </div>
-
-            <div class="flex-1 flex flex-col gap-4">
-                <div class="bg-slate-800 rounded-xl p-6 border border-slate-600 flex items-center gap-4">
-                    <i class="fa-solid fa-medal text-4xl text-blue-400"></i>
-                    <div>
-                        <p class="text-sm text-slate-400">경기 MVP (최고 점수)</p>
-                        <p class="text-2xl font-bold text-white" id="mvpName">-</p>
-                        <p class="text-sm text-blue-300"><span id="mvpScore">0</span> PTS</p>
-                    </div>
-                </div>
-                <div class="bg-slate-800 rounded-xl p-6 border border-slate-600 flex items-center gap-4">
-                    <i class="fa-solid fa-brain text-4xl text-emerald-400"></i>
-                    <div>
-                        <p class="text-sm text-slate-400">최고의 두뇌 (최다 정답)</p>
-                        <p class="text-2xl font-bold text-white" id="brainName">-</p>
-                        <p class="text-sm text-emerald-300"><span id="brainCount">0</span> 문제 해결</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <button onclick="location.reload()" class="mt-12 bg-slate-700 hover:bg-slate-600 px-8 py-3 rounded-lg text-white font-bold transition-colors">초기화 및 로비로 돌아가기</button>
+    <!-- 5. Game End Screen -->
+    <div id="endScreen" class="fixed inset-0 z-50 bg-slate-900/95 hidden flex-col items-center justify-center backdrop-blur-md">
+        <i class="fa-solid fa-trophy text-7xl text-yellow-500 mb-4"></i>
+        <h1 class="text-6xl font-black text-white mb-2">WINNER : <span id="winTeamName" class="text-yellow-400">-</span></h1>
+        <p class="text-xl text-slate-300 mb-10">우승을 축하합니다!</p>
+        <button onclick="location.reload()" class="bg-slate-700 hover:bg-slate-600 px-8 py-3 rounded-lg text-white font-bold transition-all">로비로 돌아가기</button>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, updateDoc, onSnapshot, increment, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, updateDoc, onSnapshot, increment, collection, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // ==========================================
-        // 🛠️ Firebase 설정 (선생님의 프로젝트 정보)
-        // ==========================================
         const firebaseConfig = {
           apiKey: "AIzaSyBTqSuwHQT8sTvGhCRWJ9FXSFxxqMzxdRU",
           authDomain: "duru01001-6dc7d.firebaseapp.com",
@@ -541,570 +330,259 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Firestore Strict Path Rules Followed
         const GAME_DOC_PATH = `artifacts/${appId}/public/data/gameState/main`;
         const PLAYERS_COL_PATH = `artifacts/${appId}/public/data/players`;
         
-        let userId = null;
-        let myDocRef = null;
-        let gameDocRef = doc(db, GAME_DOC_PATH);
-
+        let userId, myDocRef, gameDocRef = doc(db, GAME_DOC_PATH);
         let myData = { nickname: "", team: null, score: 0, solved: 0, isAdmin: false };
-        let gameState = { status: 'waiting', distances: { "1":0, "2":0, "3":0, "4":0, "5":0 }, m40: null, m80: null };
-        let playersMap = {}; 
-        let teamCounts = { 1:0, 2:0, 3:0, 4:0, 5:0 };
-
-        let currentCardLevel = null;
-        let currentProblem = null;
-        let currentInput = "";
-        
-        let minigameCleared = false;
-        let mgSortedTargets = [];
-        let mgCurrentTargetIndex = 0;
-
-        // BGM Control Variables
-        let isSoundOn = true;
-        const bgm = document.getElementById('racingBgm');
-
-        window.openRules = function() {
-            const r = document.getElementById('rulesModal');
-            r.classList.remove('hidden');
-            r.classList.add('flex');
-        };
-        window.closeRules = function() {
-            const r = document.getElementById('rulesModal');
-            r.classList.add('hidden');
-            r.classList.remove('flex');
-        };
-
-        window.toggleSound = function() {
-            isSoundOn = !isSoundOn;
-            const icon = document.getElementById('soundIcon');
-            if(isSoundOn) {
-                bgm.play().catch(e => console.log("Audio play prevented:", e));
-                icon.className = "fa-solid fa-volume-high";
-            } else {
-                bgm.pause();
-                icon.className = "fa-solid fa-volume-xmark";
-            }
-        };
-
-        function playBgm() {
-            if(isSoundOn) {
-                bgm.volume = 0.3; // 배경음악 볼륨 30% 설정
-                bgm.play().catch(e => console.log("Audio play prevented:", e));
-            }
-        }
+        let gameState = { status: 'waiting', distances: { 1:0, 2:0, 3:0, 4:0, 5:0 }, m40: null, m80: null };
+        let playersMap = {}, teamCounts = { 1:0, 2:0, 3:0, 4:0, 5:0 };
+        let currentProblem, currentInput = "", mgTargets = [], mgIdx = 0, mgCleared = false;
+        let bgm = document.getElementById('racingBgm'), isSoundOn = true;
 
         const teamColors = {
-            1: { bg: 'bg-red-500', text: 'text-red-500', name: '스피드스터', icon: 'fa-fighter-jet' },
-            2: { bg: 'bg-blue-500', text: 'text-blue-500', name: '저거너트', icon: 'fa-truck-monster' },
-            3: { bg: 'bg-green-500', text: 'text-green-500', name: '호버크래프트', icon: 'fa-space-shuttle' },
-            4: { bg: 'bg-yellow-500', text: 'text-yellow-500', name: '솔라 버기', icon: 'fa-truck-pickup' },
-            5: { bg: 'bg-purple-500', text: 'text-purple-500', name: '인터셉터', icon: 'fa-rocket' }
+            1: { bg: 'bg-red-500', text: 'text-red-500', name: '스피드스터' },
+            2: { bg: 'bg-blue-500', text: 'text-blue-500', name: '저거너트' },
+            3: { bg: 'bg-green-500', text: 'text-green-500', name: '호버크래프트' },
+            4: { bg: 'bg-yellow-500', text: 'text-yellow-500', name: '솔라 버기' },
+            5: { bg: 'bg-purple-500', text: 'text-purple-500', name: '인터셉터' }
+        };
+
+        window.openRules = () => { document.getElementById('rulesModal').classList.replace('hidden', 'flex'); };
+        window.closeRules = () => { document.getElementById('rulesModal').classList.replace('flex', 'hidden'); };
+        window.showToast = (msg) => {
+            const t = document.getElementById('toastAlert');
+            document.getElementById('toastMsg').innerText = msg;
+            t.classList.remove('hidden');
+            setTimeout(() => t.classList.add('hidden'), 3000);
+        };
+
+        window.toggleSound = () => {
+            isSoundOn = !isSoundOn;
+            if(isSoundOn) { bgm.play(); document.getElementById('soundIcon').className = "fa-solid fa-volume-high"; }
+            else { bgm.pause(); document.getElementById('soundIcon').className = "fa-solid fa-volume-xmark"; }
         };
 
         async function initApp() {
             try {
                 await signInAnonymously(auth);
-                
                 onAuthStateChanged(auth, async (user) => {
                     if (!user) return;
                     userId = user.uid;
                     myDocRef = doc(db, PLAYERS_COL_PATH, userId);
-
-                    // Initialize Game State
-                    await setDoc(gameDocRef, {
-                        status: 'waiting',
-                        distances: { "1":0, "2":0, "3":0, "4":0, "5":0 },
-                        m40: null, m80: null, winner: null
-                    }, { merge: true });
-
-                    // Snapshot queries
-                    onSnapshot(gameDocRef, (snap) => {
-                        if(snap.exists()) handleGameStateUpdate(snap.data());
-                    }, (e) => console.error(e));
-
-                    onSnapshot(collection(db, PLAYERS_COL_PATH), (snap) => {
-                        playersMap = {};
-                        snap.forEach(d => { playersMap[d.id] = d.data(); });
+                    await setDoc(gameDocRef, { status: 'waiting', distances: { 1:0, 2:0, 3:0, 4:0, 5:0 }, m40: null, m80: null }, { merge: true });
+                    onSnapshot(gameDocRef, snap => snap.exists() && handleGameStateUpdate(snap.data()));
+                    onSnapshot(collection(db, PLAYERS_COL_PATH), snap => {
+                        playersMap = {}; snap.forEach(d => { playersMap[d.id] = d.data(); });
                         if(myData.isAdmin) updateAdminPlayerList();
                         updateTeamCountsUI();
-                    }, (e) => console.error(e));
-
+                        // 내 닉네임이 강제로 변경된 경우 감지
+                        if(playersMap[userId] && playersMap[userId].nickname !== myData.nickname) {
+                            myData.nickname = playersMap[userId].nickname;
+                            if(document.getElementById('myInfoName')) document.getElementById('myInfoName').innerText = myData.nickname;
+                        }
+                    });
                     document.getElementById('loadingScreen').classList.add('hidden');
-                    document.getElementById('lobbyScreen').classList.remove('hidden');
-                    document.getElementById('lobbyScreen').classList.add('flex');
+                    document.getElementById('lobbyScreen').classList.replace('hidden', 'flex');
                 });
-
-            } catch (e) {
-                document.getElementById('loadingScreen').innerHTML = `<h2 class="text-red-500">INIT ERROR: ${e.code}</h2>`;
-            }
-        }
-
-        window.toggleAdminLogin = function() {
-            const pe = document.getElementById('playerEntryMode');
-            const ae = document.getElementById('adminEntryMode');
-            if(pe.classList.contains('hidden')) {
-                pe.classList.remove('hidden'); ae.classList.add('hidden');
-            } else {
-                pe.classList.add('hidden'); ae.classList.remove('hidden');
-                document.getElementById('adminPasswordInput').value = "";
-                document.getElementById('adminErrorTxt').innerText = "";
-            }
+            } catch (e) { document.getElementById('loadingScreen').innerHTML = `<h2 class="text-red-500">INIT ERROR: ${e.code}</h2>`; }
         }
 
         function updateTeamCountsUI() {
             teamCounts = { 1:0, 2:0, 3:0, 4:0, 5:0 };
-            Object.values(playersMap).forEach(p => {
-                if(!p.isAdmin && p.team >= 1 && p.team <= 5) {
-                    teamCounts[p.team]++;
-                }
-            });
+            Object.values(playersMap).forEach(p => { if(!p.isAdmin && p.team) teamCounts[p.team]++; });
             for(let i=1; i<=5; i++) {
-                const countEl = document.getElementById(`teamCount${i}`);
-                if(countEl) {
-                    countEl.innerText = `${teamCounts[i]} / 6 명`;
-                    if(teamCounts[i] >= 6) {
-                        countEl.classList.replace('text-slate-400', 'text-red-400');
-                    } else {
-                        countEl.classList.replace('text-red-400', 'text-slate-400');
-                    }
+                const el = document.getElementById(`teamCount${i}`);
+                if(el) {
+                    el.innerText = `${teamCounts[i]} / 6 명`;
+                    el.className = `mt-2 text-[10px] font-bold bg-slate-800 px-2 py-1 rounded-full border ${teamCounts[i] >= 6 ? 'text-red-400 border-red-600' : 'text-slate-400 border-slate-600'}`;
                 }
             }
         }
 
-        window.selectTeam = function(teamNum) {
-            document.getElementById('joinErrorTxt').innerText = "";
-            if (teamCounts[teamNum] >= 6) {
-                document.getElementById('joinErrorTxt').innerText = "해당 팀은 이미 최대 인원(6명)이 모두 찼습니다.";
+        window.selectTeam = (num) => {
+            if (teamCounts[num] >= 6) {
+                showToast("해당 팀은 정원(6명)이 가득 찼습니다!");
                 return;
             }
-            myData.team = teamNum;
+            myData.team = num;
             for(let i=1; i<=5; i++) {
                 const btn = document.getElementById(`teamBtn${i}`);
-                if(i === teamNum) {
-                    btn.classList.remove('opacity-50', 'border-slate-600');
-                    btn.classList.add('opacity-100', 'border-white', 'bg-slate-700/50');
-                } else {
-                    btn.classList.add('opacity-50', 'border-slate-600');
-                    btn.classList.remove('opacity-100', 'border-white', 'bg-slate-700/50');
-                }
+                if(i === num) { btn.classList.remove('opacity-50', 'border-slate-600'); btn.classList.add('opacity-100', 'border-white', 'bg-slate-700/50'); }
+                else { btn.classList.add('opacity-50', 'border-slate-600'); btn.classList.remove('opacity-100', 'border-white', 'bg-slate-700/50'); }
             }
-        }
+        };
 
-        window.joinGame = async function() {
+        window.joinGame = async () => {
             const nn = document.getElementById('nicknameInput').value.trim();
-            document.getElementById('joinErrorTxt').innerText = "";
-            
-            if(!nn) {
-                document.getElementById('joinErrorTxt').innerText = "이름을 입력해주세요.";
-                return;
-            }
-            if(!myData.team) {
-                document.getElementById('joinErrorTxt').innerText = "차량(팀)을 선택해주세요.";
-                return;
-            }
-            if (teamCounts[myData.team] >= 6) {
-                document.getElementById('joinErrorTxt').innerText = "선택한 팀이 가득 찼습니다. 다른 팀을 선택해주세요.";
-                return;
-            }
-
+            if(!nn || !myData.team) return showToast("이름 입력과 차량 선택을 완료해주세요!");
             myData.nickname = nn;
-            myData.isAdmin = false;
-            
             try {
-                playBgm();
-                await setDoc(myDocRef, myData);
-                enterGameScreen();
-            } catch(e) { console.error("Join error", e); }
-        }
-
-        window.joinAsAdmin = async function() {
-            const pwd = document.getElementById('adminPasswordInput').value;
-            const errEl = document.getElementById('adminErrorTxt');
-            
-            if(pwd !== '2026') {
-                errEl.innerText = "비밀번호가 일치하지 않습니다.";
-                return;
-            }
-
-            myData.isAdmin = true;
-            myData.nickname = "ADMIN";
-            try {
-                playBgm();
+                if(isSoundOn) bgm.play().catch(()=>{});
                 await setDoc(myDocRef, myData);
                 document.getElementById('lobbyScreen').classList.add('hidden');
-                document.getElementById('adminScreen').classList.remove('hidden');
-                document.getElementById('adminScreen').classList.add('flex');
+                document.getElementById('gameScreen').classList.remove('hidden');
+                document.getElementById('rulesToggleBtn').classList.remove('hidden');
+                document.getElementById('myInfoName').innerText = myData.nickname;
+                document.getElementById('myInfoTeamBadge').innerText = teamColors[myData.team].name;
+                openRules();
             } catch(e) { console.error(e); }
-        }
+        };
 
-        function enterGameScreen() {
-            document.getElementById('lobbyScreen').classList.add('hidden');
-            document.getElementById('gameScreen').classList.remove('hidden');
-            document.getElementById('rulesToggleBtn').classList.remove('hidden');
-            
-            document.getElementById('myInfoName').innerText = myData.nickname;
-            const tColor = teamColors[myData.team];
-            const badge = document.getElementById('myInfoTeamBadge');
-            badge.innerText = tColor.name;
-            badge.className = `mt-2 inline-block px-3 py-1 rounded border border-slate-600 text-sm font-bold ${tColor.text}`;
+        window.toggleAdminLogin = () => {
+            document.getElementById('playerEntryMode').classList.toggle('hidden');
+            document.getElementById('adminEntryMode').classList.toggle('hidden');
+        };
 
-            openRules();
-        }
+        window.joinAsAdmin = async () => {
+            if(document.getElementById('adminPasswordInput').value !== '2026') return showToast("비밀번호가 틀렸습니다.");
+            myData.isAdmin = true; myData.nickname = "ADMIN";
+            try {
+                await setDoc(myDocRef, myData);
+                document.getElementById('lobbyScreen').classList.add('hidden');
+                document.getElementById('adminScreen').classList.replace('hidden', 'flex');
+            } catch(e) { console.error(e); }
+        };
 
-        window.startGame = async function() {
-            await updateDoc(gameDocRef, { status: 'playing' });
-        }
-        window.resetGame = async function() {
-            await updateDoc(gameDocRef, {
-                status: 'waiting',
-                distances: { "1":0, "2":0, "3":0, "4":0, "5":0 },
-                m40: null, m80: null, winner: null
-            });
-        }
+        window.resetGame = () => updateDoc(gameDocRef, { status: 'waiting', distances: { 1:0, 2:0, 3:0, 4:0, 5:0 }, m40: null, m80: null, winner: null });
+        window.startGame = () => updateDoc(gameDocRef, { status: 'playing' });
+        
+        // 참가자 명단 초기화 (유령 데이터 삭제)
+        window.resetPlayers = async () => {
+            if(!confirm("모든 참가자 명단과 접속 정보를 초기화하시겠습니까?")) return;
+            const snap = await getDocs(collection(db, PLAYERS_COL_PATH));
+            const batch = [];
+            snap.forEach(d => deleteDoc(doc(db, PLAYERS_COL_PATH, d.id)));
+            showToast("모든 참가자 데이터가 삭제되었습니다.");
+        };
+
+        // 관리자용 닉네임 수정 기능
+        window.adminChangeNickname = async (uid, oldName) => {
+            const newName = prompt(`'${oldName}'님의 새로운 닉네임을 입력하세요:`, oldName);
+            if(newName && newName.trim() !== "" && newName !== oldName) {
+                await updateDoc(doc(db, PLAYERS_COL_PATH, uid), { nickname: newName.trim() });
+                showToast("닉네임이 성공적으로 변경되었습니다.");
+            }
+        };
 
         function updateAdminPlayerList() {
             const list = document.getElementById('adminPlayerList');
             list.innerHTML = '';
             let count = 0;
-            Object.values(playersMap).forEach(p => {
+            Object.keys(playersMap).forEach(uid => {
+                const p = playersMap[uid];
                 if(p.isAdmin) return;
                 count++;
                 const div = document.createElement('div');
-                div.className = 'bg-slate-700 p-3 rounded mb-2 flex justify-between items-center';
+                div.className = 'bg-slate-700 p-3 rounded mb-2 flex justify-between items-center border border-slate-600';
                 div.innerHTML = `
-                    <span class="font-bold text-white">${p.nickname}</span>
-                    <span class="text-xs px-2 py-1 bg-slate-800 rounded font-bold ${teamColors[p.team]?.text}">${teamColors[p.team]?.name}</span>
+                    <div class="flex items-center gap-2">
+                        <span class="font-bold text-white">${p.nickname}</span>
+                        <button onclick="adminChangeNickname('${uid}', '${p.nickname}')" class="text-slate-400 hover:text-yellow-400 text-xs"><i class="fa-solid fa-pen"></i></button>
+                    </div>
+                    <span class="text-[10px] px-2 py-1 bg-slate-800 rounded font-bold ${teamColors[p.team]?.text}">${teamColors[p.team]?.name}</span>
                 `;
                 list.appendChild(div);
             });
             document.getElementById('adminPlayerCount').innerText = count;
         }
 
-        function gcd(a, b) { return b === 0 ? a : gcd(b, a % b); }
-
-        function generateProblem(level) {
-            let qText = "", ansText = "";
-            let rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
-
-            if (level === 'green') {
-                let a = rand(-9, 9); if(a===0) a=1;
-                let b = rand(-9, 9); if(b===0) b=2;
-                let type = rand(0, 1);
-                
-                let exp = "";
-                if(a===1) exp += "x"; else if(a===-1) exp += "-x"; else exp += a + "x";
-                if(b>0) exp += " + " + b; else exp += " - " + Math.abs(b);
-
-                if (type === 0) {
-                    qText = `다음 식에서 x의 계수는?\n\n${exp}`;
-                    ansText = a.toString();
-                } else {
-                    qText = `다음 식에서 상수항은?\n\n${exp}`;
-                    ansText = b.toString();
-                }
-            } 
-            else if (level === 'yellow') {
-                let a = rand(-9, 9); if(a===0) a=2;
-                let c = rand(-5, 5); if(c===0) c=3;
-                
-                let isDiv = rand(0, 1) === 0;
-                if(isDiv) {
-                    let ans = a;
-                    let orig = a * c; 
-                    qText = `계산하시오:\n\n${orig}x ÷ ${c < 0 ? `(${c})` : c}`;
-                    ansText = ans===1 ? "x" : ans===-1 ? "-x" : ans+"x";
-                } else {
-                    qText = `계산하시오:\n\n${a}x × ${c < 0 ? `(${c})` : c}`;
-                    let result = a * c;
-                    ansText = result===1 ? "x" : result===-1 ? "-x" : result+"x";
-                }
+        function generateProblem(lv) {
+            let r = (m, x) => Math.floor(Math.random() * (x - m + 1)) + m;
+            if(lv === 'green') {
+                let a = r(-9, 9) || 1, b = r(-9, 9) || 2;
+                let exp = `${a}x ${b>0?'+ '+b:'- '+Math.abs(b)}`;
+                return Math.random() > 0.5 ? { q:`다음 식에서 x의 계수는?\n\n${exp}`, a:a.toString() } : { q:`다음 식에서 상수항은?\n\n${exp}`, a:b.toString() };
             }
-            else if (level === 'red') {
-                let d1 = rand(2, 5);
-                let c = d1 * (rand(1,2));
-                if(Math.random() > 0.5) c = -c;
-
-                let ansA = rand(-5, 5); if(ansA===0) ansA=1;
-                let ansB = rand(-5, 5); if(ansB===0) ansB=1;
-
-                function sFrac(n, d) {
-                    let neg = (n < 0) !== (d < 0);
-                    n = Math.abs(n); d = Math.abs(d);
-                    let g = gcd(n, d);
-                    n /= g; d /= g;
-                    if(d===1) return (neg?"-":"") + n;
-                    return (neg?"-":"") + n + "/" + d;
-                }
-
-                let term1C = sFrac(ansA, c);
-                let term1 = term1C === "1" ? "x" : term1C === "-1" ? "-x" : term1C + "x";
-                
-                let term2 = sFrac(ansB, c);
-                let sign2 = term2.startsWith("-") ? "-" : "+";
-                term2 = term2.replace("-", "");
-
-                qText = `계산하시오 (x항을 먼저):\n\n( ${term1} ${sign2} ${term2} ) × ${c < 0 ? `(${c})` : c}`;
-                
-                let partA = ansA===1 ? "x" : ansA===-1 ? "-x" : ansA+"x";
-                let partB = ansB>0 ? "+"+ansB : ansB.toString();
-                ansText = partA + partB;
+            if(lv === 'yellow') {
+                let a = r(2, 9), c = r(2, 5);
+                return { q:`계산하시오:\n\n${a*c}x ÷ ${c}`, a:a+"x" };
             }
-
-            return { qText, ansText };
+            let a = (r(1, 4)/10).toFixed(1), c = r(2, 3), b = r(1, 5);
+            return { q:`계산하시오:\n\n(${a}x + ${b}) × ${c}`, a:`${(a*c).toFixed(1)}x+${b*c}` };
         }
 
-        window.selectCard = function(level) {
+        window.selectCard = (lv) => {
             if(gameState.status !== 'playing') return;
-            
-            const inner = document.getElementById(level === 'green' ? 'cardInnerGreen' : level === 'yellow' ? 'cardInnerYellow' : 'cardInnerRed');
+            const inner = document.getElementById(lv==='green'?'cardInnerGreen':lv==='yellow'?'cardInnerYellow':'cardInnerRed');
             inner.parentElement.classList.add('flipped');
-            
             setTimeout(() => {
-                currentCardLevel = level;
-                currentProblem = generateProblem(level);
-                currentInput = "";
-                
+                currentProblem = generateProblem(lv); currentInput = ""; currentCardLevel = lv;
                 document.getElementById('cardSelectionView').classList.add('hidden');
                 document.getElementById('problemSolvingView').classList.remove('hidden');
-                
-                let catName = level==='green' ? '초급문제' : level==='yellow' ? '중급문제' : '고급문제';
-                document.getElementById('probCategory').innerText = catName;
-                document.getElementById('probCategory').className = `text-sm font-bold mb-2 ${level==='green'?'text-emerald-400':level==='yellow'?'text-yellow-400':'text-red-400'}`;
-                
-                document.getElementById('probText').innerText = currentProblem.qText;
-                updateInputDisplay();
-                
+                document.getElementById('probCategory').innerText = lv==='green'?'초급':lv==='yellow'?'중급':'고급';
+                document.getElementById('probText').innerText = currentProblem.q;
+                document.getElementById('answerDisplay').innerText = "";
                 inner.parentElement.classList.remove('flipped');
-            }, 600); 
-        }
+            }, 600);
+        };
 
-        window.backToCards = function() {
-            document.getElementById('problemSolvingView').classList.add('hidden');
-            document.getElementById('cardSelectionView').classList.remove('hidden');
-        }
-
-        window.typeKey = function(key) {
-            if(key === 'C') { currentInput = ""; }
-            else { currentInput += key; }
-            updateInputDisplay();
-        }
-
-        function updateInputDisplay() {
-            document.getElementById('answerDisplay').innerText = currentInput;
-        }
-
-        window.submitAnswer = async function() {
-            if(!currentProblem) return;
-            
-            let uAns = currentInput.replace(/\s/g, '');
-            let cAns = currentProblem.ansText.replace(/\s/g, '');
-
-            if(uAns.includes("1x")) uAns = uAns.replace("1x", "x");
-            if(uAns.includes("+1x")) uAns = uAns.replace("+1x", "+x");
-            if(uAns.startsWith("-1x")) uAns = uAns.replace("-1x", "-x");
-
-            if(uAns === cAns) {
-                // 정답 로직
-                let pts = currentCardLevel === 'green' ? 10 : currentCardLevel === 'yellow' ? 30 : 60;
-                let dist = currentCardLevel === 'green' ? 1 : currentCardLevel === 'yellow' ? 3 : 6;
-                
-                // Penalty 80 적용 로직
-                if (gameState.m80 === myData.team) {
-                    if (currentCardLevel === 'yellow') dist = 2;
-                    if (currentCardLevel === 'red') dist = 4;
-                }
-
-                myData.score += pts;
-                myData.solved += 1;
-                
+        window.backToCards = () => { document.getElementById('problemSolvingView').classList.add('hidden'); document.getElementById('cardSelectionView').classList.remove('hidden'); };
+        window.typeKey = (k) => { if(k==='C') currentInput=""; else currentInput+=k; document.getElementById('answerDisplay').innerText = currentInput; };
+        
+        window.submitAnswer = async () => {
+            if(currentInput.replace(/\s/g,'') === currentProblem.a.replace(/\s/g,'')) {
+                let d = currentCardLevel==='green'?1:currentCardLevel==='yellow'?3:6;
+                if(gameState.m80 === myData.team) d = currentCardLevel==='yellow'?2:currentCardLevel==='red'?4:d;
+                myData.score += (d*10); myData.solved++;
                 document.getElementById('myScoreTxt').innerText = myData.score;
-                document.getElementById('mySolvedTxt').innerText = myData.solved;
-
-                try {
-                    await updateDoc(myDocRef, { score: myData.score, solved: myData.solved });
-                    
-                    const distKey = `distances.${myData.team}`;
-                    await updateDoc(gameDocRef, { [distKey]: increment(dist) });
-                    
-                    let newApproxDist = gameState.distances[myData.team] + dist;
-                    if(newApproxDist >= 40 && !gameState.m40) await updateDoc(gameDocRef, { m40: myData.team });
-                    if(newApproxDist >= 80 && !gameState.m80) await updateDoc(gameDocRef, { m80: myData.team });
-                    if(newApproxDist >= 120 && !gameState.winner) await updateDoc(gameDocRef, { winner: myData.team, status: 'ended' });
-
-                } catch(e) { console.error(e); }
-
+                await updateDoc(myDocRef, { score: myData.score, solved: myData.solved });
+                const distKey = `distances.${myData.team}`;
+                await updateDoc(gameDocRef, { [distKey]: increment(d) });
+                let curD = (gameState.distances[myData.team] || 0) + d;
+                if(curD >= 40 && !gameState.m40) await updateDoc(gameDocRef, { m40: myData.team });
+                if(curD >= 80 && !gameState.m80) await updateDoc(gameDocRef, { m80: myData.team });
+                if(curD >= 120 && !gameState.winner) await updateDoc(gameDocRef, { winner: myData.team, status: 'ended' });
                 backToCards();
             } else {
-                // 오답 로직
-                const inputArea = document.getElementById('answerDisplay').parentElement;
-                inputArea.classList.add('border-red-500', 'animate-shake');
-                setTimeout(() => {
-                    inputArea.classList.remove('border-red-500', 'animate-shake');
-                    currentInput = "";
-                    updateInputDisplay();
-                }, 500);
+                document.getElementById('playArea').classList.add('animate-shake');
+                setTimeout(() => { document.getElementById('playArea').classList.remove('animate-shake'); currentInput = ""; document.getElementById('answerDisplay').innerText = ""; }, 500);
             }
-        }
-
-        function checkAndTriggerMinigame() {
-            if (gameState.m40 === myData.team && !minigameCleared && gameState.status === 'playing') {
-                showMinigame();
-            }
-        }
+        };
 
         function showMinigame() {
-            const overlay = document.getElementById('minigameOverlay');
-            overlay.classList.remove('hidden');
-            overlay.classList.add('flex');
-            
-            const container = document.getElementById('mgContainer');
-            container.innerHTML = '';
-            
-            // 1~99 랜덤 숫자 10개 추출
-            let nums = [];
-            while(nums.length < 10) {
-                let r = Math.floor(Math.random() * 99) + 1;
-                if(!nums.includes(r)) nums.push(r);
-            }
-
-            // 정답 순서 계산
-            mgSortedTargets = [...nums].sort((a,b) => a - b);
-            mgCurrentTargetIndex = 0;
-            document.getElementById('mgErrorTxt').innerText = "";
-
+            document.getElementById('minigameOverlay').classList.replace('hidden', 'flex');
+            const cont = document.getElementById('mgContainer'); cont.innerHTML = "";
+            let nums = []; while(nums.length < 10) { let n = Math.floor(Math.random()*99)+1; if(!nums.includes(n)) nums.push(n); }
+            mgTargets = [...nums].sort((a,b)=>a-b); mgIdx = 0;
             nums.forEach(n => {
-                let btn = document.createElement('button');
-                btn.className = "mg-btn";
-                btn.innerText = n;
-                btn.onclick = () => handleMgClick(btn, n);
-                container.appendChild(btn);
+                let b = document.createElement('button'); b.className="mg-btn"; b.innerText=n;
+                b.onclick = () => {
+                    if(n === mgTargets[mgIdx]) { b.classList.add('mg-hidden'); mgIdx++; if(mgIdx>=10) { mgCleared=true; document.getElementById('minigameOverlay').classList.replace('flex','hidden'); } }
+                    else { document.getElementById('mgErrorTxt').innerText="순서 오류! 시스템 3초 잠금"; cont.style.pointerEvents="none"; setTimeout(()=>{cont.style.pointerEvents="auto"; document.getElementById('mgErrorTxt').innerText="";}, 3000); }
+                };
+                cont.appendChild(b);
             });
-        }
-
-        function handleMgClick(btn, n) {
-            if (n === mgSortedTargets[mgCurrentTargetIndex]) {
-                btn.classList.add('mg-hidden');
-                mgCurrentTargetIndex++;
-                if (mgCurrentTargetIndex >= 10) {
-                    minigameCleared = true;
-                    document.getElementById('minigameOverlay').classList.add('hidden');
-                    document.getElementById('minigameOverlay').classList.remove('flex');
-                }
-            } else {
-                // 순서가 틀림
-                document.getElementById('mgErrorTxt').innerText = "순서가 틀렸습니다! 시스템 재부팅 대기중...";
-                const container = document.getElementById('mgContainer');
-                container.classList.add('animate-shake');
-                
-                const overlay = document.getElementById('minigameOverlay');
-                overlay.style.pointerEvents = 'none';
-                
-                setTimeout(() => {
-                    container.classList.remove('animate-shake');
-                    overlay.style.pointerEvents = 'auto';
-                    document.getElementById('mgErrorTxt').innerText = "";
-                }, 3000);
-            }
         }
 
         function handleGameStateUpdate(data) {
             const oldStatus = gameState.status;
             gameState = data;
-
             if(myData.isAdmin) {
-                document.getElementById('adminStatusTxt').innerText = data.status.toUpperCase();
-                document.getElementById('adminM40Txt').innerText = data.m40 ? `${teamColors[data.m40].name}` : '미발동';
-                document.getElementById('adminM80Txt').innerText = data.m80 ? `${teamColors[data.m80].name}` : '미발동';
+                document.getElementById('adminStatusTxt').innerText = data.status;
+                document.getElementById('adminM40Txt').innerText = data.m40 ? teamColors[data.m40].name : '미발동';
+                document.getElementById('adminM80Txt').innerText = data.m80 ? teamColors[data.m80].name : '미발동';
             }
-
-            // 차량 이동 애니메이션 업데이트 (120을 100%로 환산)
             for(let i=1; i<=5; i++) {
-                let d = data.distances[i] || 0;
-                let pct = Math.min(100, (d / 120) * 100);
-
-                const icon = document.getElementById(`car${i}`);
-                if(icon) {
-                    icon.style.left = `${pct}%`;
-                }
-
-                const adminIcon = document.getElementById(`admin-car${i}`);
-                if(adminIcon) {
-                    adminIcon.style.left = `${pct}%`;
-                }
+                const pct = Math.min(100, ((data.distances[i] || 0) / 120) * 100) + "%";
+                if(document.getElementById(`car${i}`)) document.getElementById(`car${i}`).style.left = pct;
+                if(document.getElementById(`admin-car${i}`)) document.getElementById(`admin-car${i}`).style.left = pct;
             }
-
-            if (data.status === 'playing') {
-                if (oldStatus !== 'playing') {
-                    document.getElementById('waitStartOverlay').classList.add('hidden');
-                    document.getElementById('cardSelectionView').classList.remove('hidden');
-                    minigameCleared = false; 
-                }
-                
-                checkAndTriggerMinigame();
-
-                const penInfo = document.getElementById('localPenaltyInfo');
-                if (data.m80 === myData.team) {
-                    penInfo.innerHTML = `<p class="text-red-400 font-bold"><i class="fa-solid fa-triangle-exclamation"></i> 엔진 출력 저하 페널티!</p>`;
-                    document.getElementById('playArea').classList.add('penalty-screen');
-                } else {
-                    penInfo.innerHTML = `<p class="text-slate-500">엔진 상태 정상</p>`;
-                    document.getElementById('playArea').classList.remove('penalty-screen');
-                }
+            if(data.status === 'playing') {
+                document.getElementById('waitStartOverlay').classList.add('hidden');
+                if(data.m40 === myData.team && !mgCleared) showMinigame();
+                document.getElementById('playArea').className = (data.m80 === myData.team) ? "relative p-4 penalty-screen" : "relative p-4";
+                document.getElementById('localPenaltyInfo').innerText = (data.m80 === myData.team) ? "엔진 출력 저하 페널티 발생!" : "엔진 상태 정상";
+                if(oldStatus !== 'playing') { document.getElementById('cardSelectionView').classList.remove('hidden'); mgCleared = false; }
             }
-
-            if (data.status === 'ended') {
-                showEndScreen(data.winner);
-            } else {
-                document.getElementById('endScreen').classList.add('hidden');
-                document.getElementById('endScreen').classList.remove('flex');
+            if(data.status === 'ended' && data.winner) {
+                document.getElementById('endScreen').classList.replace('hidden', 'flex');
+                document.getElementById('winTeamName').innerText = teamColors[data.winner].name;
+                document.getElementById('winTeamName').className = teamColors[data.winner].text;
             }
         }
 
-        function showEndScreen(winTeam) {
-            document.getElementById('endScreen').classList.remove('hidden');
-            document.getElementById('endScreen').classList.add('flex');
-            
-            const winNameEl = document.getElementById('winTeamName');
-            winNameEl.innerText = teamColors[winTeam]?.name || `TEAM ${winTeam}`;
-            winNameEl.className = teamColors[winTeam]?.text || 'text-white';
-
-            let topScore = -1, mvp = null;
-            let topSolve = -1, brain = null;
-            const winMembers = [];
-
-            Object.values(playersMap).forEach(p => {
-                if(p.isAdmin) return;
-                if(p.team === winTeam) winMembers.push(p.nickname);
-                
-                if(p.score > topScore) { topScore = p.score; mvp = p; }
-                if(p.solved > topSolve) { topSolve = p.solved; brain = p; }
-            });
-
-            const wl = document.getElementById('winMembersList');
-            wl.innerHTML = '';
-            if(winMembers.length === 0) wl.innerHTML = '<li class="text-slate-500">배정된 드라이버 없음</li>';
-            winMembers.forEach(n => {
-                let li = document.createElement('li');
-                li.innerText = n;
-                wl.appendChild(li);
-            });
-
-            if(mvp) {
-                document.getElementById('mvpName').innerText = mvp.nickname;
-                document.getElementById('mvpScore').innerText = mvp.score;
-            }
-            if(brain) {
-                document.getElementById('brainName').innerText = brain.nickname;
-                document.getElementById('brainCount').innerText = brain.solved;
-            }
-        }
-
-        // Init
         initApp();
-
     </script>
 </body>
 </html>
