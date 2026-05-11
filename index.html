@@ -25,15 +25,14 @@
             height: var(--app-height);
             display: flex;
             flex-direction: column;
-            /* 하단 바 가림 방지를 위한 하단 패딩 강화 */
             padding-bottom: calc(env(safe-area-inset-bottom) + 20px);
         }
 
         .race-font { font-family: 'Orbitron', sans-serif; }
         
         ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.1); }
-        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.3); border-radius: 10px; }
+        ::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 10px; }
 
         .difficulty-btn {
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -70,6 +69,7 @@
             transition: left 0.5s ease-out; 
             filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5)); 
             transform: translate(-50%, -50%); 
+            z-index: 10; /* 자동차 레이어 */
         }
 
         .key-btn { 
@@ -91,19 +91,19 @@
         .mg-btn:active { transform: translateY(4px); box-shadow: 0 0 0 #b45309; }
         .mg-hidden { opacity: 0; pointer-events: none; }
 
-        /* 트랙 숫자 라벨 강조 */
+        /* 트랙 숫자 라벨 스타일 (z-index 상향) */
         .milestone-label {
             background: #1e293b;
             color: #f8fafc;
             font-weight: 900;
-            padding: 4px 10px;
-            border-radius: 8px;
-            border: 2px solid;
-            font-size: 14px;
+            padding: 4px 12px;
+            border-radius: 10px;
+            border: 3px solid;
+            font-size: 16px;
             transform: translateX(-50%);
             white-space: nowrap;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.6);
-            z-index: 20;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.8);
+            z-index: 30; /* 자동차보다 위에 표시 */
         }
     </style>
 </head>
@@ -153,8 +153,8 @@
         <div class="absolute inset-0 bg-slate-900/85 backdrop-blur-sm"></div>
         <div class="z-10 bg-slate-800/90 p-10 rounded-3xl border border-slate-600 shadow-2xl max-w-4xl w-full flex flex-col relative">
             <div class="flex justify-between items-center mb-8">
-                <h1 class="text-5xl race-font font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400 tracking-tight">일차식 레이싱 대결</h1>
-                <button onclick="toggleAdminLogin()" class="text-xs text-slate-500 hover:text-white uppercase tracking-widest font-bold underline">관리자 화면</button>
+                <h1 class="text-5xl race-font font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400 tracking-tight text-center w-full">일차식 레이싱 대결</h1>
+                <button onclick="toggleAdminLogin()" class="absolute top-0 right-0 p-4 text-[10px] text-slate-500 hover:text-white uppercase tracking-widest font-bold">Admin</button>
             </div>
             
             <div id="playerEntryMode">
@@ -167,27 +167,27 @@
                 <div class="grid grid-cols-5 gap-4 mb-10">
                     <button onclick="selectTeam(1)" id="teamBtn1" class="team-sel-btn flex flex-col items-center justify-center p-5 rounded-2xl border-2 border-slate-600 hover:bg-slate-700 opacity-50 transition-all">
                         <i class="fa-solid fa-fighter-jet fa-rotate-90 text-4xl text-red-500 mb-3"></i>
-                        <span class="font-bold text-xs text-slate-300">스피드스터</span>
+                        <span class="font-bold text-xs text-slate-300 whitespace-nowrap">스피드스터</span>
                         <span class="mt-2 text-[10px] font-bold text-slate-400 bg-slate-900 px-3 py-1 rounded-full border border-slate-700 whitespace-nowrap" id="teamCount1">0 / 6 명</span>
                     </button>
                     <button onclick="selectTeam(2)" id="teamBtn2" class="team-sel-btn flex flex-col items-center justify-center p-5 rounded-2xl border-2 border-slate-600 hover:bg-slate-700 opacity-50 transition-all">
                         <i class="fa-solid fa-truck-monster text-4xl text-blue-500 mb-3"></i>
-                        <span class="font-bold text-xs text-slate-300">저거너트</span>
+                        <span class="font-bold text-xs text-slate-300 whitespace-nowrap">저거너트</span>
                         <span class="mt-2 text-[10px] font-bold text-slate-400 bg-slate-900 px-3 py-1 rounded-full border border-slate-700 whitespace-nowrap" id="teamCount2">0 / 6 명</span>
                     </button>
                     <button onclick="selectTeam(3)" id="teamBtn3" class="team-sel-btn flex flex-col items-center justify-center p-5 rounded-2xl border-2 border-slate-600 hover:bg-slate-700 opacity-50 transition-all">
                         <i class="fa-solid fa-space-shuttle fa-rotate-90 text-4xl text-green-500 mb-3"></i>
-                        <span class="font-bold text-xs text-slate-300">호버크래프트</span>
+                        <span class="font-bold text-xs text-slate-300 whitespace-nowrap">호버크래프트</span>
                         <span class="mt-2 text-[10px] font-bold text-slate-400 bg-slate-900 px-3 py-1 rounded-full border border-slate-700 whitespace-nowrap" id="teamCount3">0 / 6 명</span>
                     </button>
                     <button onclick="selectTeam(4)" id="teamBtn4" class="team-sel-btn flex flex-col items-center justify-center p-5 rounded-2xl border-2 border-slate-600 hover:bg-slate-700 opacity-50 transition-all">
                         <i class="fa-solid fa-truck-pickup text-4xl text-yellow-500 mb-3"></i>
-                        <span class="font-bold text-xs text-slate-300">솔라버기</span>
+                        <span class="font-bold text-xs text-slate-300 whitespace-nowrap">솔라버기</span>
                         <span class="mt-2 text-[10px] font-bold text-slate-400 bg-slate-900 px-3 py-1 rounded-full border border-slate-700 whitespace-nowrap" id="teamCount4">0 / 6 명</span>
                     </button>
                     <button onclick="selectTeam(5)" id="teamBtn5" class="team-sel-btn flex flex-col items-center justify-center p-5 rounded-2xl border-2 border-slate-600 hover:bg-slate-700 opacity-50 transition-all">
                         <i class="fa-solid fa-rocket fa-rotate-90 text-4xl text-purple-500 mb-3"></i>
-                        <span class="font-bold text-xs text-slate-300">인터셉터</span>
+                        <span class="font-bold text-xs text-slate-300 whitespace-nowrap">인터셉터</span>
                         <span class="mt-2 text-[10px] font-bold text-slate-400 bg-slate-900 px-3 py-1 rounded-full border border-slate-700 whitespace-nowrap" id="teamCount5">0 / 6 명</span>
                     </button>
                 </div>
@@ -195,7 +195,6 @@
                 <p id="joinErrorTxt" class="text-rose-400 text-sm mt-4 text-center h-4 font-bold"></p>
             </div>
 
-            <!-- 관리자 입장 모드 -->
             <div id="adminEntryMode" class="hidden text-center">
                 <p class="text-slate-400 mb-6 font-bold uppercase tracking-widest">관리자 인증이 필요합니다</p>
                 <input type="password" id="adminPasswordInput" class="w-1/2 bg-slate-950 border border-slate-600 rounded-xl p-5 text-white text-center mb-8 text-3xl tracking-widest focus:border-yellow-500 outline-none shadow-inner" placeholder="비밀번호 입력">
@@ -223,7 +222,6 @@
                     <div class="absolute left-[66.66%] h-full w-[2px] bg-rose-500/50"></div>
                     <div class="absolute left-[100%] top-0 bottom-0 w-3 border-l-2 border-yellow-400 bg-yellow-500/20"></div>
                     
-                    <!-- 관리자용 트랙 숫자 -->
                     <div class="absolute left-[33.33%] top-[-10px] milestone-label border-yellow-500/80">40</div>
                     <div class="absolute left-[66.66%] top-[-10px] milestone-label border-rose-500/80">80</div>
                 </div>
@@ -253,7 +251,7 @@
 
             <div class="bg-slate-800 rounded-3xl p-8 flex flex-col overflow-hidden border border-slate-700 shadow-xl">
                 <div class="flex justify-between items-end mb-6 shrink-0">
-                    <h2 class="text-xl text-slate-400 font-bold uppercase tracking-widest text-xs">참가자 현황</h2>
+                    <h2 class="text-xl text-slate-400 font-bold uppercase tracking-widest text-xs">참가자 명단</h2>
                     <span class="text-sm bg-blue-900/50 text-blue-200 px-4 py-2 rounded-full border border-blue-800 font-bold"><span id="adminPlayerCount">0</span> 명 접속 중</span>
                 </div>
                 <div class="flex-1 overflow-y-auto pr-3 space-y-3" id="adminPlayerList"></div>
@@ -263,30 +261,35 @@
 
     <!-- 4. 참가자 게임 화면 -->
     <div id="gameScreen" class="flex-1 flex flex-col hidden h-full bg-slate-900 overflow-hidden">
-        <!-- 상단 트랙 (고정 높이) -->
         <div class="h-[40%] bg-slate-800 relative shadow-inner border-b-4 border-slate-700 py-6 px-16 shrink-0">
             <div class="relative w-full h-full flex flex-col justify-evenly">
-                <div class="absolute left-0 right-0 top-0 bottom-0 pointer-events-none z-0">
+                <!-- 트랙 베이스 라인들 -->
+                <div class="absolute left-0 right-0 top-0 bottom-0 pointer-events-none">
                     <div class="absolute left-0 top-0 bottom-0 w-[2px] bg-white/20"></div>
-                    <!-- 40km 지점 숫자 강조 -->
-                    <div class="absolute left-[33.33%] h-full w-[2px] bg-yellow-500/40 flex flex-col justify-start">
-                        <div class="milestone-label border-yellow-500/80 mt-[-15px]">40</div>
-                    </div>
-                    <!-- 80km 지점 숫자 강조 -->
-                    <div class="absolute left-[66.66%] h-full w-[2px] bg-rose-500/40 flex flex-col justify-start">
-                        <div class="milestone-label border-rose-500/80 mt-[-15px]">80</div>
-                    </div>
+                    <div class="absolute left-[33.33%] h-full w-[2px] bg-yellow-500/40"></div>
+                    <div class="absolute left-[66.66%] h-full w-[2px] bg-rose-500/40"></div>
                     <div class="absolute left-[100%] top-0 bottom-0 w-6 bg-yellow-500 border-l-4 border-white/40 shadow-[10px_0_30px_rgba(234,179,8,0.3)]"></div>
                 </div>
-                <div class="track-lane h-10 relative flex items-center w-full z-10"><i id="car1" class="fa-solid fa-fighter-jet fa-rotate-90 text-4xl text-red-500 car-icon absolute top-1/2" style="left: 0%;"></i></div>
-                <div class="track-lane h-10 relative flex items-center w-full z-10"><i id="car2" class="fa-solid fa-truck-monster text-4xl text-blue-500 car-icon absolute top-1/2" style="left: 0%;"></i></div>
-                <div class="track-lane h-10 relative flex items-center w-full z-10"><i id="car3" class="fa-solid fa-space-shuttle fa-rotate-90 text-4xl text-green-500 car-icon absolute top-1/2" style="left: 0%;"></i></div>
-                <div class="track-lane h-10 relative flex items-center w-full z-10"><i id="car4" class="fa-solid fa-truck-pickup text-4xl text-yellow-500 car-icon absolute top-1/2" style="left: 0%;"></i></div>
-                <div class="track-lane h-10 relative flex items-center w-full z-10"><i id="car5" class="fa-solid fa-rocket fa-rotate-90 text-4xl text-purple-500 car-icon absolute top-1/2" style="left: 0%;"></i></div>
+
+                <!-- 자동차들 -->
+                <div class="track-lane h-10 relative flex items-center w-full"><i id="car1" class="fa-solid fa-fighter-jet fa-rotate-90 text-4xl text-red-500 car-icon absolute top-1/2" style="left: 0%;"></i></div>
+                <div class="track-lane h-10 relative flex items-center w-full"><i id="car2" class="fa-solid fa-truck-monster text-4xl text-blue-500 car-icon absolute top-1/2" style="left: 0%;"></i></div>
+                <div class="track-lane h-10 relative flex items-center w-full"><i id="car3" class="fa-solid fa-space-shuttle fa-rotate-90 text-4xl text-green-500 car-icon absolute top-1/2" style="left: 0%;"></i></div>
+                <div class="track-lane h-10 relative flex items-center w-full"><i id="car4" class="fa-solid fa-truck-pickup text-4xl text-yellow-500 car-icon absolute top-1/2" style="left: 0%;"></i></div>
+                <div class="track-lane h-10 relative flex items-center w-full"><i id="car5" class="fa-solid fa-rocket fa-rotate-90 text-4xl text-purple-500 car-icon absolute top-1/2" style="left: 0%;"></i></div>
+
+                <!-- 가장 위에 표시될 숫자 라벨 (z-index 30) -->
+                <div class="absolute left-0 right-0 top-0 bottom-0 pointer-events-none">
+                    <div class="absolute left-[33.33%] h-full flex flex-col justify-start">
+                        <div class="milestone-label border-yellow-500/90 mt-[-15px]">40</div>
+                    </div>
+                    <div class="absolute left-[66.66%] h-full flex flex-col justify-start">
+                        <div class="milestone-label border-rose-500/90 mt-[-15px]">80</div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- 하단 플레이어 컨트롤 (기기별 높이 대응) -->
         <div class="flex-1 flex relative overflow-hidden">
             <div id="waitStartOverlay" class="absolute inset-0 z-20 bg-slate-900/95 backdrop-blur-md flex flex-col items-center justify-center">
                 <i class="fa-solid fa-flag-checkered text-7xl text-slate-500 mb-6 animate-bounce"></i>
@@ -295,16 +298,17 @@
             </div>
             
             <!-- 왼쪽 정보창 -->
-            <div class="w-1/4 bg-slate-900 border-r border-slate-700 p-6 flex flex-col justify-between shadow-2xl shrink-0">
-                <div class="text-center">
+            <div class="w-1/4 bg-slate-900 border-r border-slate-700 p-6 flex flex-col justify-between shadow-2xl shrink-0 overflow-hidden">
+                <div class="text-center shrink-0">
                     <p class="text-slate-500 text-[11px] font-black uppercase tracking-[0.3em] mb-2 uppercase text-center">참가자 정보</p>
                     <p class="text-3xl font-black truncate text-white" id="myInfoName">-</p>
                     <div class="mt-4 inline-block px-4 py-1.5 rounded-xl bg-slate-800 border border-slate-600 text-xs font-black uppercase tracking-tighter text-blue-400" id="myInfoTeamBadge">TEAM -</div>
                 </div>
 
-                <div class="bg-slate-800/50 p-5 rounded-3xl border border-slate-700 mt-4 shadow-inner">
-                    <p class="text-white text-xs font-black mb-4 border-b border-slate-700 pb-2 uppercase tracking-widest text-center">나의 정답 통계</p>
-                    <div class="space-y-3">
+                <!-- 정답 통계 (스크롤 기능 추가됨) -->
+                <div class="bg-slate-800/50 p-5 rounded-3xl border border-slate-700 mt-4 shadow-inner flex flex-col flex-1 overflow-hidden min-h-0">
+                    <p class="text-white text-xs font-black mb-4 border-b border-slate-700 pb-2 uppercase tracking-widest text-center shrink-0">나의 정답 통계</p>
+                    <div class="space-y-3 overflow-y-auto flex-1 pr-2">
                         <div class="flex justify-between items-center bg-slate-900/50 px-4 py-2 rounded-xl">
                             <span class="text-emerald-400 text-xs font-black uppercase">● 초급</span>
                             <span class="text-2xl font-black race-font text-white" id="mySolvedGreenTxt">0</span>
@@ -317,16 +321,17 @@
                             <span class="text-rose-400 text-xs font-black uppercase">● 상급</span>
                             <span class="text-2xl font-black race-font text-white" id="mySolvedRedTxt">0</span>
                         </div>
+                        <!-- 추가 통계가 생길 경우 자동으로 스크롤됨 -->
                     </div>
                 </div>
 
-                <div id="localPenaltyInfo" class="text-[11px] mt-4 py-3 px-4 bg-slate-800 rounded-2xl border border-slate-700 text-slate-500 text-center font-black uppercase tracking-widest">엔진 상태 정상</div>
+                <div id="localPenaltyInfo" class="text-[11px] mt-4 py-3 px-4 bg-slate-800 rounded-2xl border border-slate-700 text-slate-500 text-center font-black uppercase tracking-widest shrink-0">엔진 상태 정상</div>
             </div>
 
-            <!-- 메인 조작 영역 -->
-            <div class="flex-1 bg-slate-950 p-8 relative overflow-hidden flex flex-col items-center justify-center" id="playArea">
+            <!-- 오른쪽 메인 조작 영역 -->
+            <div class="flex-1 bg-slate-950 p-8 relative overflow-hidden flex flex-col items-center justify-center min-h-0" id="playArea">
                 <div id="cardSelectionView" class="w-full flex flex-col items-center justify-center hidden">
-                    <h2 class="text-3xl text-slate-200 font-black mb-10 tracking-[0.4em] uppercase border-b-4 border-blue-600/50 pb-4">문항 선택</h2>
+                    <h2 class="text-3xl text-slate-200 font-black mb-10 tracking-[0.4em] uppercase border-b-4 border-blue-600/50 pb-4 text-center">문항 선택</h2>
                     
                     <div class="flex flex-row gap-6 md:gap-10 justify-center w-full max-w-4xl px-4 mb-4">
                         <div onclick="selectCard('green')" class="flex-1 difficulty-btn bg-gradient-to-br from-emerald-600 to-green-800 border-emerald-400/40 text-white shadow-xl">
@@ -362,7 +367,6 @@
                     </div>
                 </div>
 
-                <!-- 보안 우회 미니게임 -->
                 <div id="minigameOverlay" class="absolute inset-0 z-30 bg-slate-900/98 backdrop-blur-2xl hidden flex flex-col items-center justify-center p-4 text-white">
                     <div class="text-center mb-10">
                         <i class="fa-solid fa-shield-halved text-7xl text-yellow-500 mb-6 drop-shadow-[0_0_30px_rgba(234,179,8,0.5)]"></i>
@@ -381,7 +385,7 @@
         <div class="relative mb-12">
             <i class="fa-solid fa-trophy text-[12rem] text-yellow-500 drop-shadow-[0_0_100px_rgba(234,179,8,0.9)] animate-bounce"></i>
         </div>
-        <h1 class="text-8xl font-black uppercase tracking-tighter">Winner: <span id="winTeamName" class="text-yellow-400">-</span></h1>
+        <h1 class="text-9xl font-black uppercase tracking-tighter">Winner: <span id="winTeamName" class="text-yellow-400">-</span></h1>
         <p class="text-4xl text-slate-400 mb-16 tracking-[0.6em] font-light uppercase">레이싱 경쟁이 완료되었습니다.</p>
         <button onclick="location.reload()" class="bg-blue-600 hover:bg-blue-500 px-20 py-8 rounded-[3rem] text-white text-4xl font-black transition-all shadow-[0_20px_70px_rgba(37,99,235,0.5)] uppercase tracking-widest">Return to Lobby</button>
     </div>
@@ -391,6 +395,7 @@
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, updateDoc, onSnapshot, increment, collection, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+        // Firebase 설정 (기존 설정 유지)
         const firebaseConfig = {
           apiKey: "AIzaSyBTqSuwHQT8sTvGhCRWJ9FXSFxxqMzxdRU",
           authDomain: "duru01001-6dc7d.firebaseapp.com",
@@ -435,15 +440,9 @@
 
         window.toggleSound = () => {
             isSoundOn = !isSoundOn;
-            if(isSoundOn) { bgm.play().catch(()=>{}); document.getElementById('soundIcon').className = "fa-solid fa-volume-high"; }
+            if(isSoundOn) { bgm.play(); document.getElementById('soundIcon').className = "fa-solid fa-volume-high"; }
             else { bgm.pause(); document.getElementById('soundIcon').className = "fa-solid fa-volume-xmark"; }
         };
-
-        function getGcd(a, b) {
-            a = Math.abs(a); b = Math.abs(b);
-            while (b) { a %= b; [a, b] = [b, a]; }
-            return a;
-        }
 
         async function initApp() {
             try {
@@ -589,7 +588,7 @@
                 return { q: `계산하시오:\n\n${a * c}x ÷ ${c}`, a: a + "x" };
             }
             if(Math.random() > 0.5) {
-                let d = [2, 4, 5, 10][r(0, 4)];
+                let d = [2, 4, 5, 10][r(0, 3)];
                 let resA = r(1, 4) * (Math.random() > 0.5 ? 1 : -1);
                 let resB = r(1, 7) * (Math.random() > 0.5 ? 1 : -1);
                 const getFracStr = (n, de) => {
@@ -686,7 +685,7 @@
                 const showPenaltyUI = (data.m80 === myData.team && myDistance >= 80);
                 document.getElementById('playArea').className = showPenaltyUI ? "flex-1 bg-slate-950 p-8 relative overflow-hidden flex flex-col items-center justify-center penalty-screen" : "flex-1 bg-slate-950 p-8 relative overflow-hidden flex flex-col items-center justify-center";
                 document.getElementById('localPenaltyInfo').innerText = showPenaltyUI ? "엔진 출력 저하 페널티 발생!" : "엔진 상태 정상";
-                document.getElementById('localPenaltyInfo').className = showPenaltyUI ? "text-[11px] mt-4 py-3 px-4 bg-red-900/50 rounded-2xl border border-red-600 text-red-200 text-center font-black uppercase tracking-widest animate-pulse" : "text-[11px] mt-4 py-3 px-4 bg-slate-800 rounded-2xl border border-slate-700 text-slate-500 text-center font-black uppercase tracking-widest";
+                document.getElementById('localPenaltyInfo').className = showPenaltyUI ? "text-[11px] mt-4 py-3 px-4 bg-red-900/50 rounded-2xl border border-red-600 text-red-200 text-center font-black uppercase tracking-widest animate-pulse shrink-0" : "text-[11px] mt-4 py-3 px-4 bg-slate-800 rounded-2xl border border-slate-700 text-slate-500 text-center font-black uppercase tracking-widest shrink-0";
                 if(oldStatus !== 'playing') { document.getElementById('cardSelectionView').classList.remove('hidden'); mgCleared = false; }
             } else if (data.status === 'waiting') {
                 document.getElementById('waitStartOverlay').classList.remove('hidden');
