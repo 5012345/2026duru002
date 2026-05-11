@@ -26,7 +26,7 @@
         ::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.1); }
         ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.3); border-radius: 10px; }
 
-        /* 직사각형 버튼 스타일 */
+        /* 가로형 직사각형 버튼 스타일 (2:1 비율 고정) */
         .difficulty-btn {
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
@@ -35,11 +35,14 @@
             align-items: center;
             justify-content: center;
             width: 100%;
-            border-radius: 1.5rem;
+            aspect-ratio: 2 / 1; 
+            border-radius: 1.25rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+            border-width: 4px;
         }
         .difficulty-btn:hover {
             transform: scale(1.05);
-            filter: brightness(1.1);
+            filter: brightness(1.15);
         }
         .difficulty-btn:active {
             transform: scale(0.95);
@@ -83,15 +86,15 @@
 </head>
 <body class="flex flex-col w-screen h-screen overflow-hidden">
 
-    <!-- 게임 규칙 모달 -->
+    <!-- 규칙 모달 -->
     <div id="rulesModal" class="fixed inset-0 z-[60] bg-slate-900/90 backdrop-blur-md hidden flex-col items-center justify-center p-4">
         <div class="bg-slate-800 border border-slate-600 rounded-xl p-8 max-w-2xl w-full shadow-2xl relative">
             <button onclick="closeRules()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-2xl"></i></button>
             <h2 class="text-3xl font-black text-white mb-6 border-b border-slate-700 pb-3 text-center">📜 게임 규칙 안내</h2>
             <ul class="text-slate-300 space-y-5 font-medium text-lg list-none p-0">
-                <li class="flex items-center"><span class="w-4 h-4 rounded-full bg-emerald-400 mr-3"></span><span class="text-emerald-400 font-bold mr-2">초급(초록)</span>: 항, 계수, 상수항 찾기 (이동 <span class="text-yellow-400 font-bold ml-1">+1</span>)</li>
-                <li class="flex items-center"><span class="w-4 h-4 rounded-full bg-yellow-400 mr-3"></span><span class="text-yellow-400 font-bold mr-2">중급(노랑)</span>: 정수 계수 단항식 계산 (이동 <span class="text-yellow-400 font-bold ml-1">+3</span>)</li>
-                <li class="flex items-center"><span class="w-4 h-4 rounded-full bg-rose-400 mr-3"></span><span class="text-rose-400 font-bold mr-2">상급(빨강)</span>: 분수/소수 계수 일차식 계산 (이동 <span class="text-yellow-400 font-bold ml-1">+6</span>)</li>
+                <li class="flex items-center"><span class="w-4 h-4 rounded-full bg-emerald-400 mr-3"></span><span class="text-emerald-400 font-bold mr-2">초급</span>: 항, 계수, 상수항 찾기 (이동 <span class="text-yellow-400 font-bold ml-1">+1</span>)</li>
+                <li class="flex items-center"><span class="w-4 h-4 rounded-full bg-yellow-400 mr-3"></span><span class="text-yellow-400 font-bold mr-2">중급</span>: 정수 계수 단항식 계산 (이동 <span class="text-yellow-400 font-bold ml-1">+3</span>)</li>
+                <li class="flex items-center"><span class="w-4 h-4 rounded-full bg-rose-400 mr-3"></span><span class="text-rose-400 font-bold mr-2">상급</span>: 복합 일차식 계산 (이동 <span class="text-yellow-400 font-bold ml-1">+6</span>)</li>
                 <li class="mt-6 text-base text-slate-400 border-t border-slate-700 pt-4">- 가장 먼저 <span class="text-yellow-400 font-bold">120칸</span>을 돌파하는 팀이 우승합니다.</li>
                 <li class="text-base text-slate-400">- <span class="text-yellow-500 font-bold">40km 도달</span>: 숫자 순서대로 누르기 미니게임 발생</li>
                 <li class="text-base text-slate-400">- <span class="text-red-500 font-bold">80km 도달</span>: 선두 팀 엔진 출력 저하 페널티</li>
@@ -102,7 +105,7 @@
         </div>
     </div>
 
-    <!-- 알림 토스트 -->
+    <!-- 토스트 알림 -->
     <div id="toastAlert" class="fixed top-10 left-1/2 -translate-x-1/2 z-[70] bg-rose-600 text-white px-8 py-4 rounded-full font-bold shadow-2xl hidden animate-bounce">
         <i class="fa-solid fa-triangle-exclamation mr-2"></i> <span id="toastMsg">알림 메시지</span>
     </div>
@@ -128,12 +131,13 @@
         <div class="z-10 bg-slate-800/90 p-10 rounded-3xl border border-slate-600 shadow-2xl max-w-4xl w-full flex flex-col relative">
             <div class="flex justify-between items-center mb-8">
                 <h1 class="text-5xl race-font font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400 tracking-tight">일차식 레이싱 대결</h1>
-                <button onclick="toggleAdminLogin()" class="text-xs text-slate-500 hover:text-white uppercase tracking-widest font-bold">관리자 화면</button>
+                <button onclick="toggleAdminLogin()" class="text-xs text-slate-500 hover:text-white uppercase tracking-widest font-bold underline">관리자 화면</button>
             </div>
             
+            <!-- 플레이어 입장 모드 -->
             <div id="playerEntryMode">
-                <div class="mb-8 w-2/3 mx-auto">
-                    <label class="block text-slate-400 mb-2 font-bold text-center text-sm uppercase tracking-widest">참가자 이름 (닉네임)</label>
+                <div class="mb-8 w-2/3 mx-auto text-center">
+                    <label class="block text-slate-400 mb-2 font-bold text-sm uppercase tracking-widest">참가자 이름 (닉네임)</label>
                     <input type="text" id="nicknameInput" class="w-full bg-slate-950 border border-slate-600 rounded-xl p-4 text-white text-center text-2xl focus:border-blue-500 outline-none transition-all shadow-inner" placeholder="닉네임 입력" maxlength="10">
                 </div>
 
@@ -165,31 +169,31 @@
                         <span class="mt-2 text-[10px] font-bold text-slate-400 bg-slate-900 px-3 py-1 rounded-full border border-slate-700 whitespace-nowrap" id="teamCount5">0 / 6 명</span>
                     </button>
                 </div>
-                <button onclick="joinGame()" class="w-full bg-gradient-to-r from-blue-600 to-blue-500 py-6 rounded-2xl font-black text-3xl hover:from-blue-500 hover:to-blue-400 shadow-[0_0_40px_rgba(59,130,246,0.5)] transition-all uppercase tracking-widest">경기장 입장</button>
+                <button onclick="joinGame()" class="w-full bg-gradient-to-r from-blue-600 to-blue-500 py-6 rounded-2xl font-black text-3xl hover:from-blue-500 hover:to-blue-400 shadow-lg transition-all uppercase tracking-widest">경기 입장</button>
                 <p id="joinErrorTxt" class="text-rose-400 text-sm mt-4 text-center h-4 font-bold"></p>
             </div>
 
+            <!-- 관리자 입장 모드 (비밀번호 가림 수정됨) -->
             <div id="adminEntryMode" class="hidden text-center">
-                <p class="text-slate-400 mb-6 font-bold uppercase tracking-widest">관리자 비밀번호를 입력하세요</p>
-                <input type="password" id="adminPasswordInput" class="w-1/2 bg-slate-950 border border-slate-600 rounded-xl p-5 text-white text-center mb-8 text-3xl tracking-widest focus:border-yellow-500 outline-none shadow-inner" placeholder="2026">
+                <p class="text-slate-400 mb-6 font-bold uppercase tracking-widest">관리자 인증이 필요합니다</p>
+                <input type="password" id="adminPasswordInput" class="w-1/2 bg-slate-950 border border-slate-600 rounded-xl p-5 text-white text-center mb-8 text-3xl tracking-widest focus:border-yellow-500 outline-none shadow-inner" placeholder="비밀번호 입력">
                 <button onclick="joinAsAdmin()" class="w-full bg-yellow-600 py-6 rounded-2xl font-black text-2xl hover:bg-yellow-500 transition-all shadow-lg uppercase">관리자 로그인</button>
             </div>
         </div>
     </div>
 
-    <!-- 3. 관리자 화면 -->
+    <!-- 3. 관리자 제어 화면 -->
     <div id="adminScreen" class="fixed inset-0 z-30 hidden bg-slate-900 p-8 flex-col">
         <div class="flex justify-between items-center mb-8 border-b border-slate-700 pb-5">
             <h1 class="text-4xl race-font font-black text-yellow-500 uppercase tracking-tighter"><i class="fa-solid fa-sliders mr-3"></i> 관리자 화면</h1>
             <div class="flex gap-4">
-                <button onclick="resetPlayers()" class="bg-slate-600 hover:bg-slate-500 px-5 py-3 rounded-xl font-bold transition-all text-sm uppercase">참가자 초기화</button>
-                <button onclick="resetGame()" class="bg-rose-600 hover:bg-rose-500 px-5 py-3 rounded-xl font-bold transition-all text-sm uppercase">레이스 리셋</button>
+                <button onclick="resetPlayers()" class="bg-slate-600 hover:bg-slate-500 px-5 py-3 rounded-xl font-bold transition-all text-sm uppercase">명단 초기화</button>
+                <button onclick="resetGame()" class="bg-rose-600 hover:bg-rose-500 px-5 py-3 rounded-xl font-bold transition-all text-sm uppercase">경기 리셋</button>
                 <button onclick="startGame()" id="adminStartBtn" class="bg-emerald-600 hover:bg-emerald-500 px-10 py-3 rounded-xl font-black transition-all shadow-xl text-lg tracking-widest uppercase">경기 시작</button>
             </div>
         </div>
 
-        <div class="w-full bg-slate-800 rounded-3xl p-6 border border-slate-700 mb-8 relative h-52 overflow-hidden px-16 shadow-2xl">
-            <h3 class="text-xs text-slate-400 font-bold mb-4 absolute top-4 left-6 tracking-[0.3em] uppercase">실시간 경기 모니터링</h3>
+        <div class="w-full bg-slate-800 rounded-3xl p-6 border border-slate-700 mb-8 relative h-52 overflow-hidden px-16 shadow-2xl text-white">
             <div class="relative w-full h-full flex flex-col justify-evenly mt-4">
                 <div class="absolute left-0 right-0 top-0 bottom-0 pointer-events-none z-0">
                     <div class="absolute left-0 top-0 bottom-0 w-[2px] bg-white/20"></div>
@@ -206,35 +210,34 @@
         </div>
 
         <div class="flex-1 grid grid-cols-2 gap-10 overflow-hidden">
-            <div class="bg-slate-800 rounded-3xl p-8 flex flex-col border border-slate-700 shadow-xl">
-                <h2 class="text-xl text-slate-400 font-bold mb-6 uppercase tracking-widest text-xs">서버 상태 정보</h2>
-                <div class="text-6xl font-black race-font mb-8 text-white uppercase tracking-tighter" id="adminStatusTxt">대기 중</div>
-                <div class="grid grid-cols-2 gap-6 mt-auto">
+            <div class="bg-slate-800 rounded-3xl p-8 flex flex-col border border-slate-700 shadow-xl text-center text-white">
+                <h2 class="text-xl text-slate-400 font-bold mb-6 uppercase tracking-widest text-xs">서버 상태</h2>
+                <div class="text-6xl font-black race-font mb-8 uppercase tracking-tighter" id="adminStatusTxt">대기 중</div>
+                <div class="grid grid-cols-2 gap-6 mt-auto text-left">
                     <div class="bg-slate-700/50 p-6 rounded-2xl border border-slate-600">
-                        <p class="text-xs text-slate-400 mb-2 uppercase font-bold">40km 이벤트 팀</p>
-                        <p class="text-2xl font-black text-yellow-400" id="adminM40Txt">미발동</p>
+                        <p class="text-xs text-slate-400 mb-2 font-bold uppercase text-center">40km 이벤트 소유팀</p>
+                        <p class="text-2xl font-black text-yellow-400 text-center" id="adminM40Txt">미발동</p>
                     </div>
                     <div class="bg-slate-700/50 p-6 rounded-2xl border border-slate-600">
-                        <p class="text-xs text-slate-400 mb-2 uppercase font-bold">80km 페널티 팀</p>
-                        <p class="text-2xl font-black text-rose-400" id="adminM80Txt">미발동</p>
+                        <p class="text-xs text-slate-400 mb-2 font-bold uppercase text-center">80km 페널티 소유팀</p>
+                        <p class="text-2xl font-black text-rose-400 text-center" id="adminM80Txt">미발동</p>
                     </div>
                 </div>
             </div>
 
             <div class="bg-slate-800 rounded-3xl p-8 flex flex-col overflow-hidden border border-slate-700 shadow-xl">
                 <div class="flex justify-between items-end mb-6">
-                    <h2 class="text-xl text-slate-400 font-bold uppercase tracking-widest text-xs">실시간 참가자 명단</h2>
+                    <h2 class="text-xl text-slate-400 font-bold uppercase tracking-widest text-xs">참가자 현황</h2>
                     <span class="text-sm bg-blue-900/50 text-blue-200 px-4 py-2 rounded-full border border-blue-800 font-bold"><span id="adminPlayerCount">0</span> 명 접속 중</span>
                 </div>
-                <div class="flex-1 overflow-y-auto pr-3 space-y-3" id="adminPlayerList">
-                    <!-- JS로 생성됨 -->
-                </div>
+                <div class="flex-1 overflow-y-auto pr-3 space-y-3" id="adminPlayerList"></div>
             </div>
         </div>
     </div>
 
     <!-- 4. 참가자 게임 화면 -->
-    <div id="gameScreen" class="flex-1 flex flex-col hidden h-full bg-slate-900">
+    <div id="gameScreen" class="flex-1 flex flex-col hidden h-full bg-slate-900 overflow-hidden">
+        <!-- 상단: 트랙 영역 -->
         <div class="h-[40%] bg-slate-800 relative shadow-inner border-b-4 border-slate-700 py-6 px-16">
             <div class="relative w-full h-full flex flex-col justify-evenly">
                 <div class="absolute left-0 right-0 top-0 bottom-0 pointer-events-none z-0">
@@ -251,16 +254,18 @@
             </div>
         </div>
 
-        <div class="h-[60%] flex relative">
+        <!-- 하단: 플레이 영역 -->
+        <div class="h-[60%] flex relative overflow-hidden">
             <div id="waitStartOverlay" class="absolute inset-0 z-20 bg-slate-900/95 backdrop-blur-md flex flex-col items-center justify-center">
                 <i class="fa-solid fa-flag-checkered text-7xl text-slate-500 mb-6 animate-bounce"></i>
                 <h2 class="text-3xl font-black text-white tracking-[0.2em] uppercase text-center">관리자의 시작 신호를 대기 중입니다</h2>
                 <p class="text-slate-500 mt-4 font-bold uppercase tracking-widest">Waiting for Race Start...</p>
             </div>
             
-            <div class="w-1/4 bg-slate-900 border-r border-slate-700 p-6 flex flex-col justify-between shadow-2xl">
-                <div>
-                    <p class="text-slate-500 text-[11px] font-black uppercase tracking-[0.3em] mb-2">참가자 정보</p>
+            <!-- 왼쪽 정보창 -->
+            <div class="w-1/4 bg-slate-900 border-r border-slate-700 p-6 flex flex-col justify-between shadow-2xl shrink-0">
+                <div class="text-center">
+                    <p class="text-slate-500 text-[11px] font-black uppercase tracking-[0.3em] mb-2 uppercase">참가자 정보</p>
                     <p class="text-3xl font-black truncate text-white" id="myInfoName">-</p>
                     <div class="mt-4 inline-block px-4 py-1.5 rounded-xl bg-slate-800 border border-slate-600 text-xs font-black uppercase tracking-tighter text-blue-400" id="myInfoTeamBadge">TEAM -</div>
                 </div>
@@ -268,15 +273,15 @@
                 <div class="bg-slate-800/50 p-5 rounded-3xl border border-slate-700 mt-6 shadow-inner">
                     <p class="text-white text-xs font-black mb-5 border-b border-slate-700 pb-2 uppercase tracking-widest text-center">나의 정답 통계</p>
                     <div class="space-y-4">
-                        <div class="flex justify-between items-center bg-slate-900/50 px-3 py-2 rounded-xl">
+                        <div class="flex justify-between items-center bg-slate-900/50 px-4 py-2 rounded-xl">
                             <span class="text-emerald-400 text-xs font-black uppercase">● 초급</span>
                             <span class="text-2xl font-black race-font text-white" id="mySolvedGreenTxt">0</span>
                         </div>
-                        <div class="flex justify-between items-center bg-slate-900/50 px-3 py-2 rounded-xl">
+                        <div class="flex justify-between items-center bg-slate-900/50 px-4 py-2 rounded-xl">
                             <span class="text-yellow-400 text-xs font-black uppercase">● 중급</span>
                             <span class="text-2xl font-black race-font text-white" id="mySolvedYellowTxt">0</span>
                         </div>
-                        <div class="flex justify-between items-center bg-slate-900/50 px-3 py-2 rounded-xl">
+                        <div class="flex justify-between items-center bg-slate-900/50 px-4 py-2 rounded-xl">
                             <span class="text-rose-400 text-xs font-black uppercase">● 상급</span>
                             <span class="text-2xl font-black race-font text-white" id="mySolvedRedTxt">0</span>
                         </div>
@@ -286,41 +291,39 @@
                 <div id="localPenaltyInfo" class="text-[11px] mt-6 py-3 px-4 bg-slate-800 rounded-2xl border border-slate-700 text-slate-500 text-center font-black uppercase tracking-widest">엔진 상태 정상</div>
             </div>
 
-            <!-- 메인 플레이 영역 (가로 나열 및 텍스트 수정) -->
-            <div class="w-3/4 bg-slate-950 p-10 relative overflow-hidden flex flex-col" id="playArea">
-                <div id="cardSelectionView" class="w-full h-full flex flex-col items-center justify-center hidden">
-                    <h3 class="text-3xl text-slate-300 font-black mb-16 tracking-[0.4em] uppercase border-b-2 border-blue-500/50 pb-4">문항 선택</h3>
+            <!-- 오른쪽 메인 조작 영역 (오버플로우 및 겹침 방지) -->
+            <div class="flex-1 bg-slate-950 p-10 relative overflow-hidden flex flex-col items-center justify-center" id="playArea">
+                <div id="cardSelectionView" class="w-full flex flex-col items-center justify-center hidden">
+                    <h2 class="text-3xl text-slate-200 font-black mb-12 tracking-[0.4em] uppercase border-b-4 border-blue-600/50 pb-4">문항 선택</h2>
                     
-                    <div class="flex flex-row gap-8 justify-center w-full max-w-[98%] px-4">
-                        <!-- 초급 버튼 -->
-                        <div onclick="selectCard('green')" class="difficulty-btn h-32 md:h-40 bg-gradient-to-br from-emerald-600 to-green-800 border-4 border-emerald-400/30 text-white shadow-[0_15px_50px_rgba(16,185,129,0.3)]">
+                    <div class="flex flex-row gap-6 md:gap-8 justify-center w-full max-w-4xl px-4">
+                        <div onclick="selectCard('green')" class="flex-1 difficulty-btn bg-gradient-to-br from-emerald-600 to-green-800 border-emerald-400/40 text-white shadow-xl">
                             <span class="text-4xl font-black">초급</span>
                             <span class="text-xl font-bold mt-2 opacity-80">+1</span>
                         </div>
-                        <!-- 중급 버튼 -->
-                        <div onclick="selectCard('yellow')" class="difficulty-btn h-32 md:h-40 bg-gradient-to-br from-yellow-500 to-amber-700 border-4 border-yellow-300/30 text-slate-950 shadow-[0_15px_50px_rgba(245,158,11,0.3)]">
+                        <div onclick="selectCard('yellow')" class="flex-1 difficulty-btn bg-gradient-to-br from-yellow-500 to-amber-700 border-yellow-300/40 text-slate-950 shadow-xl">
                             <span class="text-4xl font-black">중급</span>
                             <span class="text-xl font-bold mt-2 opacity-80">+3</span>
                         </div>
-                        <!-- 상급 버튼 -->
-                        <div onclick="selectCard('red')" class="difficulty-btn h-32 md:h-40 bg-gradient-to-br from-rose-600 to-red-800 border-4 border-rose-400/30 text-white shadow-[0_15px_50px_rgba(225,29,72,0.3)]">
+                        <div onclick="selectCard('red')" class="flex-1 difficulty-btn bg-gradient-to-br from-rose-600 to-red-800 border-rose-400/40 text-white shadow-xl">
                             <span class="text-4xl font-black">상급</span>
                             <span class="text-xl font-bold mt-2 opacity-80">+6</span>
                         </div>
                     </div>
                 </div>
 
-                <div id="problemSolvingView" class="w-full h-full flex gap-8 hidden">
-                    <div class="flex-1 bg-slate-800 rounded-[2.5rem] border-2 border-slate-600 p-8 flex flex-col items-center justify-center relative shadow-2xl">
-                        <button onclick="backToCards()" class="absolute top-6 left-6 text-slate-400 bg-slate-700 px-5 py-2.5 rounded-2xl text-sm font-black hover:text-white transition-all shadow-lg uppercase tracking-widest">돌아가기</button>
-                        <p id="probCategory" class="text-xs font-black uppercase tracking-[0.4em] text-blue-500 mb-6"></p>
-                        <div id="probText" class="text-5xl font-black text-center text-white mb-12 whitespace-pre-wrap px-12 leading-relaxed tracking-tight"></div>
-                        <div class="w-full max-w-lg bg-slate-950 border-4 border-blue-600 rounded-[3rem] p-8 text-center min-h-[110px] flex items-center justify-center shadow-[0_20px_60px_rgba(37,99,235,0.4)]">
-                            <span id="answerDisplay" class="text-6xl font-black tracking-widest text-white"></span>
+                <div id="problemSolvingView" class="w-full h-full flex gap-8 hidden items-center justify-center">
+                    <div class="flex-1 bg-slate-800 rounded-[2.5rem] border-2 border-slate-600 p-8 flex flex-col items-center justify-center relative shadow-2xl h-full overflow-hidden text-white">
+                        <button onclick="backToCards()" class="absolute top-6 left-6 text-slate-400 bg-slate-700 px-5 py-2.5 rounded-2xl text-sm font-black hover:text-white transition-all shadow-lg">돌아가기</button>
+                        <p id="probCategory" class="text-xs font-black uppercase tracking-[0.4em] text-blue-500 mb-4"></p>
+                        <!-- 글자 크기 최적화 (2xl ~ 3xl) -->
+                        <div id="probText" class="text-2xl md:text-3xl font-black text-center text-white mb-8 whitespace-pre-wrap px-8 leading-relaxed tracking-tight"></div>
+                        <div class="w-full max-w-lg bg-slate-950 border-4 border-blue-600 rounded-[3rem] p-6 text-center min-h-[90px] flex items-center justify-center shadow-[0_20px_60px_rgba(37,99,235,0.4)]">
+                            <span id="answerDisplay" class="text-4xl md:text-5xl font-black tracking-widest text-white"></span>
                             <span class="animate-pulse text-blue-500 ml-4 text-6xl">_</span>
                         </div>
                     </div>
-                    <div class="w-80 bg-slate-900 rounded-[2.5rem] border border-slate-700 p-5 grid grid-cols-4 gap-4 shadow-2xl">
+                    <div class="w-72 md:w-80 bg-slate-900 rounded-[2.5rem] border border-slate-700 p-5 grid grid-cols-4 gap-4 shadow-2xl shrink-0">
                         <button class="key-btn" onclick="typeKey('1')">1</button><button class="key-btn" onclick="typeKey('2')">2</button><button class="key-btn" onclick="typeKey('3')">3</button><button class="key-btn text-blue-400 italic text-3xl" onclick="typeKey('x')">x</button>
                         <button class="key-btn" onclick="typeKey('4')">4</button><button class="key-btn" onclick="typeKey('5')">5</button><button class="key-btn" onclick="typeKey('6')">6</button><button class="key-btn text-emerald-400 text-3xl" onclick="typeKey('+')">+</button>
                         <button class="key-btn" onclick="typeKey('7')">7</button><button class="key-btn" onclick="typeKey('8')">8</button><button class="key-btn" onclick="typeKey('9')">9</button><button class="key-btn text-emerald-400 text-4xl" onclick="typeKey('-')">-</button>
@@ -328,10 +331,11 @@
                     </div>
                 </div>
 
-                <div id="minigameOverlay" class="absolute inset-0 z-30 bg-slate-900/98 backdrop-blur-2xl hidden flex flex-col items-center justify-center p-4">
+                <!-- 보안 잠금 미니게임 -->
+                <div id="minigameOverlay" class="absolute inset-0 z-30 bg-slate-900/98 backdrop-blur-2xl hidden flex flex-col items-center justify-center p-4 text-white">
                     <div class="text-center mb-10">
                         <i class="fa-solid fa-shield-halved text-7xl text-yellow-500 mb-6 drop-shadow-[0_0_30px_rgba(234,179,8,0.5)]"></i>
-                        <h2 class="text-4xl font-black text-white uppercase tracking-tighter underline decoration-yellow-500 decoration-4 underline-offset-[12px]">보안 우회 감지</h2>
+                        <h2 class="text-4xl font-black uppercase tracking-tighter underline decoration-yellow-500 decoration-4 underline-offset-[12px]">보안 우회 감지</h2>
                         <p class="text-slate-400 mt-10 font-bold text-xl uppercase tracking-widest text-center">숫자를 작은 순서대로 클릭하여 차단을 해제하세요!</p>
                         <p id="mgErrorTxt" class="text-rose-500 font-black mt-6 h-8 animate-pulse uppercase text-xl"></p>
                     </div>
@@ -341,13 +345,13 @@
         </div>
     </div>
 
-    <!-- 우승 화면 -->
-    <div id="endScreen" class="fixed inset-0 z-50 bg-slate-950/98 hidden flex flex-col items-center justify-center backdrop-blur-2xl text-center">
+    <!-- 종료 화면 -->
+    <div id="endScreen" class="fixed inset-0 z-50 bg-slate-950/98 hidden flex flex-col items-center justify-center backdrop-blur-2xl text-center text-white">
         <div class="relative mb-12">
             <i class="fa-solid fa-trophy text-[12rem] text-yellow-500 drop-shadow-[0_0_100px_rgba(234,179,8,0.9)] animate-bounce"></i>
         </div>
-        <h1 class="text-9xl font-black text-white mb-6 uppercase tracking-tighter">Winner: <span id="winTeamName" class="text-yellow-400">-</span></h1>
-        <p class="text-4xl text-slate-400 mb-20 tracking-[0.6em] font-light uppercase">레이싱이 성공적으로 완료되었습니다.</p>
+        <h1 class="text-9xl font-black uppercase tracking-tighter">Winner: <span id="winTeamName" class="text-yellow-400">-</span></h1>
+        <p class="text-4xl text-slate-400 mb-20 tracking-[0.6em] font-light uppercase">레이싱 경쟁이 완료되었습니다.</p>
         <button onclick="location.reload()" class="bg-blue-600 hover:bg-blue-500 px-20 py-8 rounded-[3rem] text-white text-4xl font-black transition-all shadow-[0_20px_70px_rgba(37,99,235,0.5)] uppercase tracking-widest">Return to Lobby</button>
     </div>
 
@@ -356,7 +360,7 @@
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, updateDoc, onSnapshot, increment, collection, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Firebase 설정 (신규 프로젝트: duru01001-6dc7d)
+        // Firebase 설정
         const firebaseConfig = {
           apiKey: "AIzaSyBTqSuwHQT8sTvGhCRWJ9FXSFxxqMzxdRU",
           authDomain: "duru01001-6dc7d.firebaseapp.com",
@@ -401,9 +405,15 @@
 
         window.toggleSound = () => {
             isSoundOn = !isSoundOn;
-            if(isSoundOn) { bgm.play(); document.getElementById('soundIcon').className = "fa-solid fa-volume-high"; }
+            if(isSoundOn) { bgm.play().catch(()=>{}); document.getElementById('soundIcon').className = "fa-solid fa-volume-high"; }
             else { bgm.pause(); document.getElementById('soundIcon').className = "fa-solid fa-volume-xmark"; }
         };
+
+        function getGcd(a, b) {
+            a = Math.abs(a); b = Math.abs(b);
+            while (b) { a %= b; [a, b] = [b, a]; }
+            return a;
+        }
 
         async function initApp() {
             try {
@@ -521,16 +531,16 @@
                 const p = playersMap[uid];
                 if(p.isAdmin) return;
                 const div = document.createElement('div');
-                div.className = 'bg-slate-700/50 p-4 rounded-2xl flex justify-between items-center border border-slate-600/50';
+                div.className = 'bg-slate-700/50 p-4 rounded-2xl flex justify-between items-center border border-slate-600/50 text-white font-bold';
                 div.innerHTML = `
                     <div class="flex items-center gap-3">
-                        <span class="font-black text-white text-lg">${p.nickname}</span>
+                        <span>${p.nickname}</span>
                         <button onclick="adminChangeNickname('${uid}', '${p.nickname}')" class="text-slate-500 hover:text-yellow-400 transition-colors"><i class="fa-solid fa-pen-to-square"></i></button>
                     </div>
                     <div class="flex gap-2">
-                        <span class="bg-slate-900 px-3 py-1 rounded-lg text-emerald-400 border border-emerald-900/50 text-[10px] font-black uppercase">초급:${p.solvedG||0}</span>
-                        <span class="bg-slate-900 px-3 py-1 rounded-lg text-yellow-400 border border-yellow-900/50 text-[10px] font-black uppercase">중급:${p.solvedY||0}</span>
-                        <span class="bg-slate-900 px-3 py-1 rounded-lg text-rose-400 border border-rose-900/50 text-[10px] font-black uppercase">상급:${p.solvedR||0}</span>
+                        <span class="bg-slate-900 px-3 py-1 rounded-lg text-emerald-400 border border-emerald-900/50 text-[10px] font-black uppercase">1단:${p.solvedG||0}</span>
+                        <span class="bg-slate-900 px-3 py-1 rounded-lg text-yellow-400 border border-yellow-900/50 text-[10px] font-black uppercase">2단:${p.solvedY||0}</span>
+                        <span class="bg-slate-900 px-3 py-1 rounded-lg text-rose-400 border border-rose-900/50 text-[10px] font-black uppercase">3단:${p.solvedR||0}</span>
                         <span class="px-3 py-1 bg-slate-950 rounded-lg font-black text-[10px] ${teamColors[p.team]?.text}">${teamColors[p.team]?.name}</span>
                     </div>
                 `;
@@ -541,17 +551,54 @@
 
         function generateProblem(lv) {
             let r = (m, x) => Math.floor(Math.random() * (x - m + 1)) + m;
+            
             if(lv === 'green') {
-                let a = r(-9, 9) || 1, b = r(-9, 9) || 2;
-                let exp = `${a}x ${b>0?'+ '+b:'- '+Math.abs(b)}`;
-                return Math.random() > 0.5 ? { q:`다음 식에서 x의 계수는?\n\n${exp}`, a:a.toString() } : { q:`다음 식에서 상수항은?\n\n${exp}`, a:b.toString() };
+                let a = r(-9, 9) || 1;
+                let b = r(-9, 9) || 2;
+                let exp = `${a === 1 ? '' : a === -1 ? '-' : a}x ${b > 0 ? '+ ' + b : '- ' + Math.abs(b)}`;
+                return Math.random() > 0.5 ? { q: `다음 식에서 x의 계수는?\n\n${exp}`, a: a.toString() } : { q: `다음 식에서 상수항은?\n\n${exp}`, a: b.toString() };
             }
             if(lv === 'yellow') {
                 let a = r(2, 9), c = r(2, 5);
-                return { q:`계산하시오:\n\n${a*c}x ÷ ${c}`, a:a+"x" };
+                return { q: `계산하시오:\n\n${a * c}x ÷ ${c}`, a: a + "x" };
             }
-            let a = (r(1, 4)/10).toFixed(1), c = r(2, 3), b = r(1, 5);
-            return { q:`계산하시오:\n\n(${a}x + ${b}) × ${c}`, a:`${(a*c).toFixed(1)}x+${b*c}` };
+            
+            // 상급 단계 (복합 연산): 문항은 분수/소수, 정답은 정수
+            if(Math.random() > 0.5) {
+                let d = [2, 4, 5, 8, 10][r(0, 4)];
+                let resA = r(1, 4) * (Math.random() > 0.5 ? 1 : -1);
+                let resB = r(1, 7) * (Math.random() > 0.5 ? 1 : -1);
+                
+                const getFracStr = (n, de) => {
+                    const common = getGcd(n, de);
+                    const simplifiedN = n / common;
+                    const simplifiedD = de / common;
+                    if (simplifiedD === 1) return simplifiedN.toString();
+                    return `${simplifiedN}/${simplifiedD}`;
+                };
+
+                let fracA = getFracStr(resA, d);
+                let fracB = getFracStr(resB, d);
+                let qA = fracA === "1" ? "" : fracA === "-1" ? "-" : fracA;
+                
+                return { 
+                    q: `계산하시오:\n\n( ${qA}x ${resB > 0 ? '+' : '-'} ${fracB.replace('-', '')} ) × ${d}`, 
+                    a: (resA === 1 ? 'x' : resA === -1 ? '-x' : resA + 'x') + (resB > 0 ? '+' + resB : resB < 0 ? resB : '')
+                };
+            } else {
+                let scale = 10;
+                let resA = r(1, 15) * (Math.random() > 0.5 ? 1 : -1);
+                let resB = r(1, 20) * (Math.random() > 0.5 ? 1 : -1);
+                const fmtDec = (n) => Number.parseFloat((n / scale).toFixed(1)).toString();
+                let decA = fmtDec(resA);
+                let decB = fmtDec(resB);
+                let qA = decA === "1" ? "" : decA === "-1" ? "-" : decA;
+
+                return {
+                    q: `계산하시오:\n\n( ${qA}x ${resB > 0 ? '+' : '-'} ${decB.replace('-', '')} ) × ${scale}`,
+                    a: (resA === 1 ? 'x' : resA === -1 ? '-x' : resA + 'x') + (resB > 0 ? '+' + resB : resB < 0 ? resB : '')
+                };
+            }
         }
 
         window.selectCard = (lv) => {
@@ -559,7 +606,7 @@
             currentProblem = generateProblem(lv); currentInput = ""; currentCardLevel = lv;
             document.getElementById('cardSelectionView').classList.add('hidden');
             document.getElementById('problemSolvingView').classList.remove('hidden');
-            document.getElementById('probCategory').innerText = lv==='green'?'초급 단계 문항':lv==='yellow'?'중급 단계 문항':'상급 단계 문항';
+            document.getElementById('probCategory').innerText = lv==='green'?'1단계 (항과 계수)':lv==='yellow'?'2단계 (정수 연산)':'3단계 (복합 연산)';
             document.getElementById('probText').innerText = currentProblem.q;
             document.getElementById('answerDisplay').innerText = "";
         };
@@ -598,12 +645,13 @@
             document.getElementById('minigameOverlay').classList.replace('hidden', 'flex');
             const cont = document.getElementById('mgContainer'); cont.innerHTML = "";
             let nums = []; while(nums.length < 10) { let n = Math.floor(Math.random()*99)+1; if(!nums.includes(n)) nums.push(n); }
-            mgTargets = [...nums].sort((a,b)=>a-b); mgIdx = 0;
+            let mgTargets = [...nums].sort((a,b)=>a-b); 
+            let mgIdx = 0;
             nums.forEach(n => {
                 let b = document.createElement('button'); b.className="mg-btn"; b.innerText=n;
                 b.onclick = () => {
                     if(n === mgTargets[mgIdx]) { b.classList.add('mg-hidden'); mgIdx++; if(mgIdx>=10) { mgCleared=true; document.getElementById('minigameOverlay').classList.replace('flex','hidden'); } }
-                    else { document.getElementById('mgErrorTxt').innerText="Error: 보안 인증 실패! 3초 잠금"; cont.style.pointerEvents="none"; setTimeout(()=>{cont.style.pointerEvents="auto"; document.getElementById('mgErrorTxt').innerText="";}, 3000); }
+                    else { document.getElementById('mgErrorTxt').innerText="Error: 보안 인증 실패! 3초 대기"; cont.style.pointerEvents="none"; setTimeout(()=>{cont.style.pointerEvents="auto"; document.getElementById('mgErrorTxt').innerText="";}, 3000); }
                 };
                 cont.appendChild(b);
             });
@@ -625,8 +673,15 @@
             if(data.status === 'playing') {
                 document.getElementById('waitStartOverlay').classList.add('hidden');
                 if(data.m40 === myData.team && !mgCleared) showMinigame();
-                document.getElementById('playArea').className = (data.m80 === myData.team) ? "relative p-10 penalty-screen flex flex-col" : "relative p-10 flex flex-col";
-                document.getElementById('localPenaltyInfo').innerText = (data.m80 === myData.team) ? "엔진 출력 저하 페널티 발생!" : "엔진 상태 정상";
+                
+                // 붉은 색 경고 표시 조건: 내가 페널티 대상(m80)이고, 내 거리가 80km 이상일 때만 나타남
+                const myDistance = data.distances[myData.team] || 0;
+                const showPenaltyUI = (data.m80 === myData.team && myDistance >= 80);
+                
+                document.getElementById('playArea').className = showPenaltyUI ? "flex-1 bg-slate-950 p-10 relative overflow-hidden flex flex-col items-center justify-center penalty-screen" : "flex-1 bg-slate-950 p-10 relative overflow-hidden flex flex-col items-center justify-center";
+                document.getElementById('localPenaltyInfo').innerText = showPenaltyUI ? "엔진 출력 저하 페널티 발생!" : "엔진 상태 정상";
+                document.getElementById('localPenaltyInfo').className = showPenaltyUI ? "text-[11px] mt-6 py-3 px-4 bg-red-900/50 rounded-2xl border border-red-600 text-red-200 text-center font-black uppercase tracking-widest animate-pulse" : "text-[11px] mt-6 py-3 px-4 bg-slate-800 rounded-2xl border border-slate-700 text-slate-500 text-center font-black uppercase tracking-widest";
+                
                 if(oldStatus !== 'playing') { document.getElementById('cardSelectionView').classList.remove('hidden'); mgCleared = false; }
             } else if (data.status === 'waiting') {
                 document.getElementById('waitStartOverlay').classList.remove('hidden');
