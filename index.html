@@ -11,7 +11,7 @@
     
     <style>
         :root {
-            --app-height: 100dvh; /* 기기별 동적 높이 대응 */
+            --app-height: 100dvh;
         }
 
         body {
@@ -23,8 +23,10 @@
             user-select: none;
             -webkit-user-select: none;
             height: var(--app-height);
-            /* 태블릿 하단 바 대응을 위한 패딩 */
-            padding-bottom: env(safe-area-inset-bottom);
+            display: flex;
+            flex-direction: column;
+            /* 하단 바 가림 방지를 위한 하단 패딩 강화 */
+            padding-bottom: calc(env(safe-area-inset-bottom) + 20px);
         }
 
         .race-font { font-family: 'Orbitron', sans-serif; }
@@ -33,7 +35,6 @@
         ::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.1); }
         ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.3); border-radius: 10px; }
 
-        /* 가로형 직사각형 버튼 스타일 */
         .difficulty-btn {
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
@@ -90,18 +91,19 @@
         .mg-btn:active { transform: translateY(4px); box-shadow: 0 0 0 #b45309; }
         .mg-hidden { opacity: 0; pointer-events: none; }
 
-        /* 트랙 라인 숫자 강조 스타일 */
+        /* 트랙 숫자 라벨 강조 */
         .milestone-label {
             background: #1e293b;
-            color: white;
+            color: #f8fafc;
             font-weight: 900;
-            padding: 2px 8px;
-            border-radius: 6px;
+            padding: 4px 10px;
+            border-radius: 8px;
             border: 2px solid;
-            font-size: 12px;
+            font-size: 14px;
             transform: translateX(-50%);
             white-space: nowrap;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+            z-index: 20;
         }
     </style>
 </head>
@@ -221,9 +223,9 @@
                     <div class="absolute left-[66.66%] h-full w-[2px] bg-rose-500/50"></div>
                     <div class="absolute left-[100%] top-0 bottom-0 w-3 border-l-2 border-yellow-400 bg-yellow-500/20"></div>
                     
-                    <!-- 관리자용 숫자 표시 -->
-                    <div class="absolute left-[33.33%] top-[-10px] milestone-label border-yellow-500/50">40</div>
-                    <div class="absolute left-[66.66%] top-[-10px] milestone-label border-rose-500/50">80</div>
+                    <!-- 관리자용 트랙 숫자 -->
+                    <div class="absolute left-[33.33%] top-[-10px] milestone-label border-yellow-500/80">40</div>
+                    <div class="absolute left-[66.66%] top-[-10px] milestone-label border-rose-500/80">80</div>
                 </div>
                 <div class="track-lane h-6 relative flex items-center w-full z-10"><i id="admin-car1" class="fa-solid fa-fighter-jet fa-rotate-90 text-xl text-red-500 car-icon absolute top-1/2" style="left: 0%;"></i></div>
                 <div class="track-lane h-6 relative flex items-center w-full z-10"><i id="admin-car2" class="fa-solid fa-truck-monster text-xl text-blue-500 car-icon absolute top-1/2" style="left: 0%;"></i></div>
@@ -233,17 +235,17 @@
             </div>
         </div>
 
-        <div class="flex-1 grid grid-cols-2 gap-10 overflow-hidden">
+        <div class="flex-1 grid grid-cols-2 gap-10 overflow-hidden mb-4">
             <div class="bg-slate-800 rounded-3xl p-8 flex flex-col border border-slate-700 shadow-xl text-center text-white">
-                <h2 class="text-xl text-slate-400 font-bold mb-6 uppercase tracking-widest text-xs text-center">서버 상태</h2>
-                <div class="text-6xl font-black race-font mb-8 uppercase tracking-tighter text-center" id="adminStatusTxt">대기 중</div>
+                <h2 class="text-xl text-slate-400 font-bold mb-6 uppercase tracking-widest text-xs">서버 상태</h2>
+                <div class="text-6xl font-black race-font mb-8 uppercase tracking-tighter" id="adminStatusTxt">대기 중</div>
                 <div class="grid grid-cols-2 gap-6 mt-auto text-left">
                     <div class="bg-slate-700/50 p-6 rounded-2xl border border-slate-600">
-                        <p class="text-xs text-slate-400 mb-2 font-bold uppercase text-center">40km 이벤트 팀</p>
+                        <p class="text-xs text-slate-400 mb-2 font-bold uppercase text-center">40km 이벤트 소유팀</p>
                         <p class="text-2xl font-black text-yellow-400 text-center" id="adminM40Txt">미발동</p>
                     </div>
                     <div class="bg-slate-700/50 p-6 rounded-2xl border border-slate-600">
-                        <p class="text-xs text-slate-400 mb-2 font-bold uppercase text-center">80km 페널티 팀</p>
+                        <p class="text-xs text-slate-400 mb-2 font-bold uppercase text-center">80km 페널티 소유팀</p>
                         <p class="text-2xl font-black text-rose-400 text-center" id="adminM80Txt">미발동</p>
                     </div>
                 </div>
@@ -251,7 +253,7 @@
 
             <div class="bg-slate-800 rounded-3xl p-8 flex flex-col overflow-hidden border border-slate-700 shadow-xl">
                 <div class="flex justify-between items-end mb-6 shrink-0">
-                    <h2 class="text-xl text-slate-400 font-bold uppercase tracking-widest text-xs">실시간 참가자 명단</h2>
+                    <h2 class="text-xl text-slate-400 font-bold uppercase tracking-widest text-xs">참가자 현황</h2>
                     <span class="text-sm bg-blue-900/50 text-blue-200 px-4 py-2 rounded-full border border-blue-800 font-bold"><span id="adminPlayerCount">0</span> 명 접속 중</span>
                 </div>
                 <div class="flex-1 overflow-y-auto pr-3 space-y-3" id="adminPlayerList"></div>
@@ -261,18 +263,18 @@
 
     <!-- 4. 참가자 게임 화면 -->
     <div id="gameScreen" class="flex-1 flex flex-col hidden h-full bg-slate-900 overflow-hidden">
-        <!-- 상단: 트랙 영역 (고정 높이) -->
+        <!-- 상단 트랙 (고정 높이) -->
         <div class="h-[40%] bg-slate-800 relative shadow-inner border-b-4 border-slate-700 py-6 px-16 shrink-0">
             <div class="relative w-full h-full flex flex-col justify-evenly">
                 <div class="absolute left-0 right-0 top-0 bottom-0 pointer-events-none z-0">
                     <div class="absolute left-0 top-0 bottom-0 w-[2px] bg-white/20"></div>
-                    <!-- 40km 지점 -->
-                    <div class="absolute left-[33.33%] h-full w-[2px] bg-yellow-500/40 flex flex-col justify-end pb-2">
-                        <div class="milestone-label border-yellow-500/60 mb-8">40</div>
+                    <!-- 40km 지점 숫자 강조 -->
+                    <div class="absolute left-[33.33%] h-full w-[2px] bg-yellow-500/40 flex flex-col justify-start">
+                        <div class="milestone-label border-yellow-500/80 mt-[-15px]">40</div>
                     </div>
-                    <!-- 80km 지점 -->
-                    <div class="absolute left-[66.66%] h-full w-[2px] bg-rose-500/40 flex flex-col justify-end pb-2">
-                        <div class="milestone-label border-rose-500/60 mb-8">80</div>
+                    <!-- 80km 지점 숫자 강조 -->
+                    <div class="absolute left-[66.66%] h-full w-[2px] bg-rose-500/40 flex flex-col justify-start">
+                        <div class="milestone-label border-rose-500/80 mt-[-15px]">80</div>
                     </div>
                     <div class="absolute left-[100%] top-0 bottom-0 w-6 bg-yellow-500 border-l-4 border-white/40 shadow-[10px_0_30px_rgba(234,179,8,0.3)]"></div>
                 </div>
@@ -284,7 +286,7 @@
             </div>
         </div>
 
-        <!-- 하단: 플레이 영역 -->
+        <!-- 하단 플레이어 컨트롤 (기기별 높이 대응) -->
         <div class="flex-1 flex relative overflow-hidden">
             <div id="waitStartOverlay" class="absolute inset-0 z-20 bg-slate-900/95 backdrop-blur-md flex flex-col items-center justify-center">
                 <i class="fa-solid fa-flag-checkered text-7xl text-slate-500 mb-6 animate-bounce"></i>
@@ -296,13 +298,13 @@
             <div class="w-1/4 bg-slate-900 border-r border-slate-700 p-6 flex flex-col justify-between shadow-2xl shrink-0">
                 <div class="text-center">
                     <p class="text-slate-500 text-[11px] font-black uppercase tracking-[0.3em] mb-2 uppercase text-center">참가자 정보</p>
-                    <p class="text-3xl font-black truncate text-white text-center" id="myInfoName">-</p>
+                    <p class="text-3xl font-black truncate text-white" id="myInfoName">-</p>
                     <div class="mt-4 inline-block px-4 py-1.5 rounded-xl bg-slate-800 border border-slate-600 text-xs font-black uppercase tracking-tighter text-blue-400" id="myInfoTeamBadge">TEAM -</div>
                 </div>
 
-                <div class="bg-slate-800/50 p-5 rounded-3xl border border-slate-700 mt-6 shadow-inner">
-                    <p class="text-white text-xs font-black mb-5 border-b border-slate-700 pb-2 uppercase tracking-widest text-center">나의 정답 통계</p>
-                    <div class="space-y-4">
+                <div class="bg-slate-800/50 p-5 rounded-3xl border border-slate-700 mt-4 shadow-inner">
+                    <p class="text-white text-xs font-black mb-4 border-b border-slate-700 pb-2 uppercase tracking-widest text-center">나의 정답 통계</p>
+                    <div class="space-y-3">
                         <div class="flex justify-between items-center bg-slate-900/50 px-4 py-2 rounded-xl">
                             <span class="text-emerald-400 text-xs font-black uppercase">● 초급</span>
                             <span class="text-2xl font-black race-font text-white" id="mySolvedGreenTxt">0</span>
@@ -318,15 +320,15 @@
                     </div>
                 </div>
 
-                <div id="localPenaltyInfo" class="text-[11px] mt-6 py-3 px-4 bg-slate-800 rounded-2xl border border-slate-700 text-slate-500 text-center font-black uppercase tracking-widest">엔진 상태 정상</div>
+                <div id="localPenaltyInfo" class="text-[11px] mt-4 py-3 px-4 bg-slate-800 rounded-2xl border border-slate-700 text-slate-500 text-center font-black uppercase tracking-widest">엔진 상태 정상</div>
             </div>
 
-            <!-- 오른쪽 메인 조작 영역 (자동 조절 flex-1) -->
-            <div class="flex-1 bg-slate-950 p-10 relative overflow-hidden flex flex-col items-center justify-center" id="playArea">
+            <!-- 메인 조작 영역 -->
+            <div class="flex-1 bg-slate-950 p-8 relative overflow-hidden flex flex-col items-center justify-center" id="playArea">
                 <div id="cardSelectionView" class="w-full flex flex-col items-center justify-center hidden">
-                    <h2 class="text-3xl text-slate-200 font-black mb-12 tracking-[0.4em] uppercase border-b-4 border-blue-600/50 pb-4">문항 선택</h2>
+                    <h2 class="text-3xl text-slate-200 font-black mb-10 tracking-[0.4em] uppercase border-b-4 border-blue-600/50 pb-4">문항 선택</h2>
                     
-                    <div class="flex flex-row gap-6 md:gap-10 justify-center w-full max-w-4xl px-4">
+                    <div class="flex flex-row gap-6 md:gap-10 justify-center w-full max-w-4xl px-4 mb-4">
                         <div onclick="selectCard('green')" class="flex-1 difficulty-btn bg-gradient-to-br from-emerald-600 to-green-800 border-emerald-400/40 text-white shadow-xl">
                             <span class="text-4xl font-black">초급</span>
                             <span class="text-xl font-bold mt-2 opacity-80">+1</span>
@@ -360,7 +362,7 @@
                     </div>
                 </div>
 
-                <!-- 보안 잠금 미니게임 -->
+                <!-- 보안 우회 미니게임 -->
                 <div id="minigameOverlay" class="absolute inset-0 z-30 bg-slate-900/98 backdrop-blur-2xl hidden flex flex-col items-center justify-center p-4 text-white">
                     <div class="text-center mb-10">
                         <i class="fa-solid fa-shield-halved text-7xl text-yellow-500 mb-6 drop-shadow-[0_0_30px_rgba(234,179,8,0.5)]"></i>
@@ -375,12 +377,12 @@
     </div>
 
     <!-- 종료 화면 -->
-    <div id="endScreen" class="fixed inset-0 z-50 bg-slate-950/98 hidden flex flex-col items-center justify-center backdrop-blur-2xl text-center text-white">
+    <div id="endScreen" class="fixed inset-0 z-50 bg-slate-950/98 hidden flex flex-col items-center justify-center backdrop-blur-2xl text-center text-white p-10">
         <div class="relative mb-12">
             <i class="fa-solid fa-trophy text-[12rem] text-yellow-500 drop-shadow-[0_0_100px_rgba(234,179,8,0.9)] animate-bounce"></i>
         </div>
-        <h1 class="text-9xl font-black uppercase tracking-tighter">Winner: <span id="winTeamName" class="text-yellow-400">-</span></h1>
-        <p class="text-4xl text-slate-400 mb-20 tracking-[0.6em] font-light uppercase">레이싱 경쟁이 완료되었습니다.</p>
+        <h1 class="text-8xl font-black uppercase tracking-tighter">Winner: <span id="winTeamName" class="text-yellow-400">-</span></h1>
+        <p class="text-4xl text-slate-400 mb-16 tracking-[0.6em] font-light uppercase">레이싱 경쟁이 완료되었습니다.</p>
         <button onclick="location.reload()" class="bg-blue-600 hover:bg-blue-500 px-20 py-8 rounded-[3rem] text-white text-4xl font-black transition-all shadow-[0_20px_70px_rgba(37,99,235,0.5)] uppercase tracking-widest">Return to Lobby</button>
     </div>
 
@@ -389,7 +391,6 @@
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, updateDoc, onSnapshot, increment, collection, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Firebase 설정
         const firebaseConfig = {
           apiKey: "AIzaSyBTqSuwHQT8sTvGhCRWJ9FXSFxxqMzxdRU",
           authDomain: "duru01001-6dc7d.firebaseapp.com",
@@ -434,7 +435,7 @@
 
         window.toggleSound = () => {
             isSoundOn = !isSoundOn;
-            if(isSoundOn) { bgm.play(); document.getElementById('soundIcon').className = "fa-solid fa-volume-high"; }
+            if(isSoundOn) { bgm.play().catch(()=>{}); document.getElementById('soundIcon').className = "fa-solid fa-volume-high"; }
             else { bgm.pause(); document.getElementById('soundIcon').className = "fa-solid fa-volume-xmark"; }
         };
 
@@ -466,8 +467,6 @@
                     document.getElementById('lobbyScreen').classList.replace('hidden', 'flex');
                 });
             } catch (e) { 
-                document.getElementById('loadingIcon').classList.replace('fa-spin', 'fa-circle-exclamation');
-                document.getElementById('loadingIcon').classList.replace('text-blue-500', 'text-red-500');
                 document.getElementById('loadingText').innerText = "접속 실패"; 
             }
         }
@@ -580,10 +579,8 @@
 
         function generateProblem(lv) {
             let r = (m, x) => Math.floor(Math.random() * (x - m + 1)) + m;
-            
             if(lv === 'green') {
-                let a = r(-9, 9) || 1;
-                let b = r(-9, 9) || 2;
+                let a = r(-9, 9) || 1; let b = r(-9, 9) || 2;
                 let exp = `${a === 1 ? '' : a === -1 ? '-' : a}x ${b > 0 ? '+ ' + b : '- ' + Math.abs(b)}`;
                 return Math.random() > 0.5 ? { q: `다음 식에서 x의 계수는?\n\n${exp}`, a: a.toString() } : { q: `다음 식에서 상수항은?\n\n${exp}`, a: b.toString() };
             }
@@ -591,24 +588,18 @@
                 let a = r(2, 9), c = r(2, 5);
                 return { q: `계산하시오:\n\n${a * c}x ÷ ${c}`, a: a + "x" };
             }
-            
             if(Math.random() > 0.5) {
-                let d = [2, 4, 5, 8, 10][r(0, 4)];
+                let d = [2, 4, 5, 10][r(0, 4)];
                 let resA = r(1, 4) * (Math.random() > 0.5 ? 1 : -1);
                 let resB = r(1, 7) * (Math.random() > 0.5 ? 1 : -1);
-                
                 const getFracStr = (n, de) => {
                     const common = getGcd(n, de);
-                    const simplifiedN = n / common;
-                    const simplifiedD = de / common;
+                    const simplifiedN = n / common; const simplifiedD = de / common;
                     if (simplifiedD === 1) return simplifiedN.toString();
                     return `${simplifiedN}/${simplifiedD}`;
                 };
-
-                let fracA = getFracStr(resA, d);
-                let fracB = getFracStr(resB, d);
+                let fracA = getFracStr(resA, d); let fracB = getFracStr(resB, d);
                 let qA = fracA === "1" ? "" : fracA === "-1" ? "-" : fracA;
-                
                 return { 
                     q: `계산하시오:\n\n( ${qA}x ${resB > 0 ? '+' : '-'} ${fracB.replace('-', '')} ) × ${d}`, 
                     a: (resA === 1 ? 'x' : resA === -1 ? '-x' : resA + 'x') + (resB > 0 ? '+' + resB : resB < 0 ? resB : '')
@@ -618,10 +609,8 @@
                 let resA = r(1, 15) * (Math.random() > 0.5 ? 1 : -1);
                 let resB = r(1, 20) * (Math.random() > 0.5 ? 1 : -1);
                 const fmtDec = (n) => Number.parseFloat((n / scale).toFixed(1)).toString();
-                let decA = fmtDec(resA);
-                let decB = fmtDec(resB);
+                let decA = fmtDec(resA); let decB = fmtDec(resB);
                 let qA = decA === "1" ? "" : decA === "-1" ? "-" : decA;
-
                 return {
                     q: `계산하시오:\n\n( ${qA}x ${resB > 0 ? '+' : '-'} ${decB.replace('-', '')} ) × ${scale}`,
                     a: (resA === 1 ? 'x' : resA === -1 ? '-x' : resA + 'x') + (resB > 0 ? '+' + resB : resB < 0 ? resB : '')
@@ -646,18 +635,11 @@
             if(currentInput.replace(/\s/g,'') === currentProblem.a.replace(/\s/g,'')) {
                 let d = currentCardLevel==='green'?1:currentCardLevel==='yellow'?3:6;
                 if(gameState.m80 === myData.team) d = currentCardLevel==='yellow'?2:currentCardLevel==='red'?4:d;
-                
-                if(currentCardLevel==='green') myData.solvedG++;
-                else if(currentCardLevel==='yellow') myData.solvedY++;
-                else if(currentCardLevel==='red') myData.solvedR++;
-                
-                myData.score += (d*10); 
+                if(currentCardLevel==='green') myData.solvedG++; else if(currentCardLevel==='yellow') myData.solvedY++; else if(currentCardLevel==='red') myData.solvedR++;
                 updateStatsUI();
-                
                 await updateDoc(myDocRef, { score: myData.score, solvedG: myData.solvedG, solvedY: myData.solvedY, solvedR: myData.solvedR });
                 const distKey = `distances.${myData.team}`;
                 await updateDoc(gameDocRef, { [distKey]: increment(d) });
-                
                 let curD = (gameState.distances[myData.team] || 0) + d;
                 if(curD >= 40 && !gameState.m40) await updateDoc(gameDocRef, { m40: myData.team });
                 if(curD >= 80 && !gameState.m80) await updateDoc(gameDocRef, { m80: myData.team });
@@ -673,8 +655,7 @@
             document.getElementById('minigameOverlay').classList.replace('hidden', 'flex');
             const cont = document.getElementById('mgContainer'); cont.innerHTML = "";
             let nums = []; while(nums.length < 10) { let n = Math.floor(Math.random()*99)+1; if(!nums.includes(n)) nums.push(n); }
-            let mgTargets = [...nums].sort((a,b)=>a-b); 
-            let mgIdx = 0;
+            let mgTargets = [...nums].sort((a,b)=>a-b); let mgIdx = 0;
             nums.forEach(n => {
                 let b = document.createElement('button'); b.className="mg-btn"; b.innerText=n;
                 b.onclick = () => {
@@ -701,14 +682,11 @@
             if(data.status === 'playing') {
                 document.getElementById('waitStartOverlay').classList.add('hidden');
                 if(data.m40 === myData.team && !mgCleared) showMinigame();
-                
                 const myDistance = data.distances[myData.team] || 0;
                 const showPenaltyUI = (data.m80 === myData.team && myDistance >= 80);
-                
-                document.getElementById('playArea').className = showPenaltyUI ? "flex-1 bg-slate-950 p-10 relative overflow-hidden flex flex-col items-center justify-center penalty-screen" : "flex-1 bg-slate-950 p-10 relative overflow-hidden flex flex-col items-center justify-center";
+                document.getElementById('playArea').className = showPenaltyUI ? "flex-1 bg-slate-950 p-8 relative overflow-hidden flex flex-col items-center justify-center penalty-screen" : "flex-1 bg-slate-950 p-8 relative overflow-hidden flex flex-col items-center justify-center";
                 document.getElementById('localPenaltyInfo').innerText = showPenaltyUI ? "엔진 출력 저하 페널티 발생!" : "엔진 상태 정상";
-                document.getElementById('localPenaltyInfo').className = showPenaltyUI ? "text-[11px] mt-6 py-3 px-4 bg-red-900/50 rounded-2xl border border-red-600 text-red-200 text-center font-black uppercase tracking-widest animate-pulse" : "text-[11px] mt-6 py-3 px-4 bg-slate-800 rounded-2xl border border-slate-700 text-slate-500 text-center font-black uppercase tracking-widest";
-                
+                document.getElementById('localPenaltyInfo').className = showPenaltyUI ? "text-[11px] mt-4 py-3 px-4 bg-red-900/50 rounded-2xl border border-red-600 text-red-200 text-center font-black uppercase tracking-widest animate-pulse" : "text-[11px] mt-4 py-3 px-4 bg-slate-800 rounded-2xl border border-slate-700 text-slate-500 text-center font-black uppercase tracking-widest";
                 if(oldStatus !== 'playing') { document.getElementById('cardSelectionView').classList.remove('hidden'); mgCleared = false; }
             } else if (data.status === 'waiting') {
                 document.getElementById('waitStartOverlay').classList.remove('hidden');
@@ -722,7 +700,6 @@
                 document.getElementById('winTeamName').innerText = teamColors[data.winner]?.name || '-';
             }
         }
-
         initApp();
     </script>
 </body>
