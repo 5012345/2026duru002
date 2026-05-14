@@ -18,7 +18,6 @@
             font-family: 'Noto Sans KR', sans-serif;
             background-color: #0f172a;
             color: #f8fafc;
-            /* 전체 페이지 스크롤 허용 */
             overflow-y: auto;
             overflow-x: hidden;
             touch-action: pan-y;
@@ -36,7 +35,6 @@
         ::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); }
         ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 10px; }
 
-        /* 가로형 직사각형 버튼 스타일 (2:1 비율) */
         .difficulty-btn {
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
@@ -94,7 +92,6 @@
         .mg-btn:active { transform: translateY(4px); box-shadow: 0 0 0 #b45309; }
         .mg-hidden { opacity: 0; pointer-events: none; }
 
-        /* 트랙 숫자 라벨 스타일 (최상단 레이어) */
         .milestone-label {
             background: #1e293b;
             color: #f8fafc;
@@ -109,7 +106,6 @@
             z-index: 30;
         }
 
-        /* 개별 화면 컨테이너 스크롤 지원 */
         .screen-container {
             display: none;
             flex-direction: column;
@@ -119,6 +115,21 @@
         }
         .screen-container.active {
             display: flex;
+        }
+
+        /* 우승 애니메이션 효과 */
+        @keyframes firework {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+        .firework-particle {
+            position: absolute; width: 10px; height: 10px; border-radius: 50%;
+            animation: firework 1s ease-out infinite;
+        }
+        .rank-row {
+            transition: all 0.5s ease-in-out;
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid rgba(255,255,255,0.1);
         }
     </style>
 </head>
@@ -149,6 +160,9 @@
     </div>
 
     <audio id="racingBgm" loop><source src="bgm.mp3" type="audio/mpeg"></audio>
+    <!-- 빵빠레 효과음 (Mixkit Free SFX) -->
+    <audio id="fanfareSfx"><source src="https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3" type="audio/mpeg"></audio>
+
     <div class="fixed top-4 right-4 z-50 flex gap-2">
         <button onclick="openRules()" class="bg-slate-800/80 text-white p-3 rounded-full border border-slate-600 shadow-lg hover:bg-slate-700 transition-all"><i class="fa-solid fa-book"></i></button>
         <button onclick="toggleSound()" id="soundToggleBtn" class="bg-slate-800/80 text-white p-3 rounded-full border border-slate-600 shadow-lg hover:bg-slate-700 transition-all">
@@ -388,14 +402,43 @@
         </div>
     </div>
 
-    <!-- 종료 화면 -->
-    <div id="endScreen" class="fixed inset-0 z-50 bg-slate-950/98 hidden flex flex-col items-center justify-center backdrop-blur-2xl text-center text-white p-10 overflow-y-auto">
-        <div class="relative mb-12">
-            <i class="fa-solid fa-trophy text-[12rem] text-yellow-500 drop-shadow-[0_0_100px_rgba(234,179,8,0.9)] animate-bounce"></i>
+    <!-- 5. 종료 및 우승 화면 ( podium 연출 강화 ) -->
+    <div id="endScreen" class="fixed inset-0 z-[100] bg-slate-950/98 hidden flex flex-col items-center justify-center backdrop-blur-3xl text-center text-white p-10 overflow-hidden">
+        <!-- 불꽃놀이 파티클 컨테이너 -->
+        <div id="fireworksContainer" class="absolute inset-0 pointer-events-none"></div>
+
+        <div class="relative z-10 mb-8 flex flex-col items-center">
+            <h2 class="text-4xl race-font font-bold text-slate-400 tracking-[0.5em] mb-4 uppercase">RACE FINISHED</h2>
+            <div id="winCarDisplay" class="mb-6 transform scale-[3] filter drop-shadow-[0_0_20px_rgba(234,179,8,0.8)] animate-bounce">
+                <!-- 1등 자동차 아이콘 주입 -->
+            </div>
+            <h1 class="text-7xl font-black uppercase tracking-tighter mt-10 mb-2">WINNER: <span id="winTeamName" class="text-yellow-400">-</span></h1>
         </div>
-        <h1 class="text-9xl font-black uppercase tracking-tighter">Winner: <span id="winTeamName" class="text-yellow-400">-</span></h1>
-        <p class="text-4xl text-slate-400 mb-16 tracking-[0.6em] font-light uppercase">레이싱 경쟁이 완료되었습니다.</p>
-        <button onclick="location.reload()" class="bg-blue-600 hover:bg-blue-500 px-20 py-8 rounded-[3rem] text-white text-4xl font-black transition-all shadow-[0_20px_70px_rgba(37,99,235,0.5)] uppercase tracking-widest mb-10">Return to Lobby</button>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-5xl mb-12 z-10">
+            <!-- 명예의 전당 (MVP) -->
+            <div class="bg-slate-800/80 p-8 rounded-[2.5rem] border-2 border-yellow-500/50 shadow-[0_0_30px_rgba(234,179,8,0.2)]">
+                <h3 class="text-yellow-400 font-black text-2xl mb-6 uppercase tracking-widest"><i class="fa-solid fa-crown mr-3"></i> 팀 기여도 1위 (MVP)</h3>
+                <p id="mvpNameDisplay" class="text-5xl font-black text-white truncate">-</p>
+                <p class="text-slate-400 mt-4 font-bold text-lg" id="mvpScoreDisplay">0 PTS</p>
+            </div>
+            <!-- 최고의 두뇌 -->
+            <div class="bg-slate-800/80 p-8 rounded-[2.5rem] border-2 border-emerald-500/50 shadow-[0_0_30px_rgba(16,185,129,0.2)]">
+                <h3 class="text-emerald-400 font-black text-2xl mb-6 uppercase tracking-widest"><i class="fa-solid fa-brain mr-3"></i> 최다 문제 풀이자</h3>
+                <p id="brainNameDisplay" class="text-5xl font-black text-white truncate">-</p>
+                <p class="text-slate-400 mt-4 font-bold text-lg" id="brainCountDisplay">0 PROBLEMS</p>
+            </div>
+        </div>
+
+        <!-- 나머지 순위 공개 -->
+        <div class="w-full max-w-4xl z-10">
+            <h4 class="text-slate-500 font-black uppercase tracking-widest mb-6 text-sm">경기 최종 순위 (RANKINGS)</h4>
+            <div id="rankListDisplay" class="grid grid-cols-4 gap-4">
+                <!-- 2~5위 렌더링 -->
+            </div>
+        </div>
+
+        <button onclick="location.reload()" class="mt-16 z-10 bg-slate-800 hover:bg-slate-700 border border-slate-600 px-12 py-5 rounded-2xl text-white text-xl font-black transition-all shadow-xl uppercase tracking-widest">Lobby (Return)</button>
     </div>
 
     <script type="module">
@@ -403,7 +446,7 @@
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, updateDoc, onSnapshot, increment, collection, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Firebase 설정 (신규 프로젝트: duru01001-6dc7d)
+        // Firebase 설정 (기존 설정 유지)
         const firebaseConfig = {
           apiKey: "AIzaSyBTqSuwHQT8sTvGhCRWJ9FXSFxxqMzxdRU",
           authDomain: "duru01001-6dc7d.firebaseapp.com",
@@ -428,13 +471,14 @@
         let playersMap = {}, teamCounts = { 1:0, 2:0, 3:0, 4:0, 5:0 };
         let currentProblem, currentInput = "", mgTargets = [], mgIdx = 0, mgCleared = false, currentCardLevel = "";
         let bgm = document.getElementById('racingBgm'), isSoundOn = true;
+        let fanfare = document.getElementById('fanfareSfx');
 
         const teamColors = {
-            1: { bg: 'bg-red-500', text: 'text-red-500', name: '스피드스터' },
-            2: { bg: 'bg-blue-500', text: 'text-blue-500', name: '저거너트' },
-            3: { bg: 'bg-green-500', text: 'text-green-500', name: '호버크래프트' },
-            4: { bg: 'bg-yellow-500', text: 'text-yellow-500', name: '솔라 버기' },
-            5: { bg: 'bg-purple-500', text: 'text-purple-500', name: '인터셉터' }
+            1: { bg: 'bg-red-500', text: 'text-red-500', name: '스피드스터', icon: 'fa-fighter-jet', rot: 'fa-rotate-90' },
+            2: { bg: 'bg-blue-500', text: 'text-blue-500', name: '저거너트', icon: 'fa-truck-monster', rot: '' },
+            3: { bg: 'bg-green-500', text: 'text-green-500', name: '호버크래프트', icon: 'fa-space-shuttle', rot: 'fa-rotate-90' },
+            4: { bg: 'bg-yellow-500', text: 'text-yellow-500', name: '솔라 버기', icon: 'fa-truck-pickup', rot: '' },
+            5: { bg: 'bg-purple-500', text: 'text-purple-500', name: '인터셉터', icon: 'fa-rocket', rot: 'fa-rotate-90' }
         };
 
         window.openRules = () => { document.getElementById('rulesModal').classList.replace('hidden', 'flex'); };
@@ -574,7 +618,7 @@
                 const div = document.createElement('div');
                 div.className = 'bg-slate-700/50 p-4 rounded-2xl flex justify-between items-center border border-slate-600/50 text-white font-bold';
                 div.innerHTML = `
-                    <div class="flex items-center gap-3">
+                    <div class="flex items-center gap-3 text-white font-bold">
                         <span>${p.nickname}</span>
                         <button onclick="adminChangeNickname('${uid}', '${p.nickname}')" class="text-slate-500 hover:text-yellow-400 transition-colors"><i class="fa-solid fa-pen-to-square"></i></button>
                     </div>
@@ -679,6 +723,74 @@
             });
         }
 
+        function createCelebration() {
+            const container = document.getElementById('fireworksContainer');
+            const colors = ['#f59e0b', '#10b981', '#3b82f6', '#ef4444', '#a855f7'];
+            for(let i=0; i<50; i++) {
+                setTimeout(() => {
+                    const particle = document.createElement('div');
+                    particle.className = 'firework-particle';
+                    particle.style.left = Math.random() * 100 + '%';
+                    particle.style.top = Math.random() * 100 + '%';
+                    particle.style.backgroundColor = colors[Math.floor(Math.random()*colors.length)];
+                    container.appendChild(particle);
+                    setTimeout(() => particle.remove(), 1000);
+                }, i * 100);
+            }
+        }
+
+        function renderWinningScreen(data) {
+            const winTeamId = data.winner;
+            const team = teamColors[winTeamId];
+            
+            // 1등 자동차 표시
+            document.getElementById('winCarDisplay').innerHTML = `<i class="fa-solid ${team.icon} ${team.rot} ${team.text} text-9xl"></i>`;
+            document.getElementById('winTeamName').innerText = team.name;
+
+            // MVP 및 최고의 두뇌 찾기
+            let mvp = { nickname: "-", score: -1 };
+            let brain = { nickname: "-", solved: -1 };
+            
+            Object.values(playersMap).forEach(p => {
+                if(p.team === winTeamId) {
+                    const totalSolved = (p.solvedG || 0) + (p.solvedY || 0) + (p.solvedR || 0);
+                    if(p.score > mvp.score) mvp = { nickname: p.nickname, score: p.score };
+                    if(totalSolved > brain.solved) brain = { nickname: p.nickname, solved: totalSolved };
+                }
+            });
+
+            document.getElementById('mvpNameDisplay').innerText = mvp.nickname;
+            document.getElementById('mvpScoreDisplay').innerText = `${mvp.score} PTS`;
+            document.getElementById('brainNameDisplay').innerText = brain.nickname;
+            document.getElementById('brainCountDisplay').innerText = `${brain.solved} PROBLEMS`;
+
+            // 나머지 등수 정렬
+            const sortedTeams = Object.keys(data.distances)
+                .map(id => ({ id: parseInt(id), dist: data.distances[id] }))
+                .filter(t => t.id !== winTeamId)
+                .sort((a, b) => b.dist - a.dist);
+
+            const rankList = document.getElementById('rankListDisplay');
+            rankList.innerHTML = "";
+            sortedTeams.forEach((t, i) => {
+                const info = teamColors[t.id];
+                const div = document.createElement('div');
+                div.className = "rank-row p-5 rounded-2xl flex flex-col items-center gap-3";
+                div.innerHTML = `
+                    <span class="text-xs text-slate-500 font-black">${i+2}등</span>
+                    <i class="fa-solid ${info.icon} ${info.rot} ${info.text} text-3xl"></i>
+                    <span class="font-bold text-xs">${info.name}</span>
+                    <span class="text-slate-400 text-[10px] font-black">${t.dist}km</span>
+                `;
+                rankList.appendChild(div);
+            });
+
+            // 빵빠레 및 애니메이션
+            bgm.pause();
+            if(isSoundOn) fanfare.play().catch(()=>{});
+            createCelebration();
+        }
+
         function handleGameStateUpdate(data) {
             const oldStatus = gameState.status;
             gameState = data;
@@ -695,14 +807,11 @@
             if(data.status === 'playing') {
                 document.getElementById('waitStartOverlay').classList.add('hidden');
                 if(data.m40 === myData.team && !mgCleared) showMinigame();
-                
                 const myDistance = data.distances[myData.team] || 0;
                 const showPenaltyUI = (data.m80 === myData.team && myDistance >= 80);
-                
-                document.getElementById('playArea').className = showPenaltyUI ? "flex-1 bg-slate-950 p-10 relative overflow-hidden flex flex-col items-center justify-center penalty-screen" : "flex-1 bg-slate-950 p-10 relative overflow-hidden flex flex-col items-center justify-center";
+                document.getElementById('playArea').className = showPenaltyUI ? "flex-1 bg-slate-950 p-8 relative overflow-hidden flex flex-col items-center justify-center penalty-screen" : "flex-1 bg-slate-950 p-8 relative overflow-hidden flex flex-col items-center justify-center";
                 document.getElementById('localPenaltyInfo').innerText = showPenaltyUI ? "엔진 출력 저하 페널티 발생!" : "엔진 상태 정상";
                 document.getElementById('localPenaltyInfo').className = showPenaltyUI ? "text-[11px] mt-4 py-3 px-4 bg-red-900/50 rounded-2xl border border-red-600 text-red-200 text-center font-black uppercase tracking-widest animate-pulse shrink-0" : "text-[11px] mt-4 py-3 px-4 bg-slate-800 rounded-2xl border border-slate-700 text-slate-500 text-center font-black uppercase tracking-widest shrink-0";
-                
                 if(oldStatus !== 'playing') { document.getElementById('cardSelectionView').classList.remove('hidden'); mgCleared = false; }
             } else if (data.status === 'waiting') {
                 document.getElementById('waitStartOverlay').classList.remove('hidden');
@@ -712,8 +821,8 @@
                 mgCleared = false;
             }
             if(data.status === 'ended' && data.winner) {
-                document.getElementById('endScreen').classList.add('active');
-                document.getElementById('winTeamName').innerText = teamColors[data.winner]?.name || '-';
+                document.getElementById('endScreen').classList.replace('hidden', 'flex');
+                renderWinningScreen(data);
             }
         }
         initApp();
