@@ -143,7 +143,7 @@
 
     <div class="fixed top-4 right-4 z-50 flex gap-2">
         <button onclick="openRules()" class="bg-slate-800/80 text-white p-3 rounded-full border border-slate-600 shadow-lg hover:bg-slate-700 transition-all"><i class="fa-solid fa-book"></i></button>
-        </div>
+    </div>
 
     <div id="loadingScreen" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-900 text-center px-10">
         <i id="loadingIcon" class="fa-solid fa-circle-notch fa-spin text-6xl text-blue-500 mb-8"></i>
@@ -222,14 +222,17 @@
                     <div class="absolute left-[33.33%] h-full w-[2px] bg-yellow-500/50"></div>
                     <div class="absolute left-[66.66%] h-full w-[2px] bg-rose-500/50"></div>
                     <div class="absolute left-[100%] top-0 bottom-0 w-3 border-l-2 border-yellow-400 bg-yellow-500/20"></div>
-                    <div class="absolute left-[33.33%] top-[-10px] milestone-label border-yellow-500/80">40</div>
-                    <div class="absolute left-[66.66%] top-[-10px] milestone-label border-rose-500/80">80</div>
                 </div>
                 <div class="track-lane h-6 relative flex items-center w-full z-10"><i id="admin-car1" class="fa-solid fa-fighter-jet fa-rotate-90 text-xl text-red-500 car-icon absolute top-1/2" style="left: 0%;"></i></div>
                 <div class="track-lane h-6 relative flex items-center w-full z-10"><i id="admin-car2" class="fa-solid fa-truck-monster text-xl text-blue-500 car-icon absolute top-1/2" style="left: 0%;"></i></div>
                 <div class="track-lane h-6 relative flex items-center w-full z-10"><i id="admin-car3" class="fa-solid fa-space-shuttle fa-rotate-90 text-xl text-green-500 car-icon absolute top-1/2" style="left: 0%;"></i></div>
                 <div class="track-lane h-6 relative flex items-center w-full z-10"><i id="admin-car4" class="fa-solid fa-truck-pickup text-xl text-yellow-500 car-icon absolute top-1/2" style="left: 0%;"></i></div>
                 <div class="track-lane h-6 relative flex items-center w-full z-10"><i id="admin-car5" class="fa-solid fa-rocket fa-rotate-90 text-xl text-purple-500 car-icon absolute top-1/2" style="left: 0%;"></i></div>
+                
+                <div class="absolute left-0 right-0 top-0 bottom-0 pointer-events-none z-20">
+                    <div class="absolute left-[33.33%] top-[-10px] milestone-label border-yellow-500/80">40</div>
+                    <div class="absolute left-[66.66%] top-[-10px] milestone-label border-rose-500/80">80</div>
+                </div>
             </div>
         </div>
 
@@ -239,11 +242,11 @@
                 <div class="text-6xl font-black race-font mb-8 uppercase tracking-tighter" id="adminStatusTxt">대기 중</div>
                 <div class="grid grid-cols-2 gap-6 mt-auto text-left">
                     <div class="bg-slate-700/50 p-6 rounded-2xl border border-slate-600">
-                        <p class="text-xs text-slate-400 mb-2 font-bold uppercase text-center">40km 이벤트 팀</p>
+                        <p class="text-xs text-slate-400 mb-2 font-bold uppercase text-center">40km 이벤트 소유팀</p>
                         <p class="text-2xl font-black text-yellow-400 text-center" id="adminM40Txt">미발동</p>
                     </div>
                     <div class="bg-slate-700/50 p-6 rounded-2xl border border-slate-600">
-                        <p class="text-xs text-slate-400 mb-2 font-bold uppercase text-center">80km 페널티 팀</p>
+                        <p class="text-xs text-slate-400 mb-2 font-bold uppercase text-center">80km 페널티 소유팀</p>
                         <p class="text-2xl font-black text-rose-400 text-center" id="adminM80Txt">미발동</p>
                     </div>
                 </div>
@@ -251,10 +254,10 @@
 
             <div class="bg-slate-800 rounded-3xl p-8 flex flex-col border border-slate-700 shadow-xl">
                 <div class="flex justify-between items-end mb-6 shrink-0">
-                    <h2 class="text-xl text-slate-400 font-bold uppercase tracking-widest text-xs">참가자 확인 및 차량 이동</h2>
+                    <h2 class="text-xl text-slate-400 font-bold uppercase tracking-widest text-xs">자동차별 참가자 확인 및 팀 이동</h2>
                     <span class="text-sm bg-blue-900/50 text-blue-200 px-4 py-2 rounded-full border border-blue-800 font-bold"><span id="adminPlayerCount">0</span> 명 접속 중</span>
                 </div>
-                <div class="flex-1 overflow-y-auto pr-3 space-y-1" id="adminPlayerList"></div>
+                <div class="space-y-1 overflow-y-auto" id="adminPlayerList"></div>
             </div>
         </div>
     </div>
@@ -262,20 +265,20 @@
     <div id="gameScreen" class="screen-container bg-slate-900">
         <div class="h-[40%] bg-slate-800 relative shadow-inner border-b-4 border-slate-700 py-6 px-16 shrink-0 min-h-[300px]">
             <div class="relative w-full h-full flex flex-col justify-evenly">
-                <div class="absolute left-0 right-0 top-0 bottom-0 pointer-events-none">
+                <div class="absolute left-0 right-0 top-0 bottom-0 pointer-events-none z-0">
                     <div class="absolute left-0 top-0 bottom-0 w-[2px] bg-white/20"></div>
                     <div class="absolute left-[33.33%] h-full w-[2px] bg-yellow-500/40"></div>
                     <div class="absolute left-[66.66%] h-full w-[2px] bg-rose-500/40"></div>
                     <div class="absolute left-[100%] top-0 bottom-0 w-6 bg-yellow-500 border-l-4 border-white/40"></div>
                 </div>
 
-                <div class="track-lane h-10 relative flex items-center w-full"><i id="car1" class="fa-solid fa-fighter-jet fa-rotate-90 text-4xl text-red-500 car-icon absolute top-1/2" style="left: 0%;"></i></div>
-                <div class="track-lane h-10 relative flex items-center w-full"><i id="car2" class="fa-solid fa-truck-monster text-4xl text-blue-500 car-icon absolute top-1/2" style="left: 0%;"></i></div>
-                <div class="track-lane h-10 relative flex items-center w-full"><i id="car3" class="fa-solid fa-space-shuttle fa-rotate-90 text-4xl text-green-500 car-icon absolute top-1/2" style="left: 0%;"></i></div>
-                <div class="track-lane h-10 relative flex items-center w-full"><i id="car4" class="fa-solid fa-truck-pickup text-4xl text-yellow-500 car-icon absolute top-1/2" style="left: 0%;"></i></div>
-                <div class="track-lane h-10 relative flex items-center w-full"><i id="car5" class="fa-solid fa-rocket fa-rotate-90 text-4xl text-purple-500 car-icon absolute top-1/2" style="left: 0%;"></i></div>
+                <div class="track-lane h-10 relative flex items-center w-full z-10"><i id="car1" class="fa-solid fa-fighter-jet fa-rotate-90 text-4xl text-red-500 car-icon absolute top-1/2" style="left: 0%;"></i></div>
+                <div class="track-lane h-10 relative flex items-center w-full z-10"><i id="car2" class="fa-solid fa-truck-monster text-4xl text-blue-500 car-icon absolute top-1/2" style="left: 0%;"></i></div>
+                <div class="track-lane h-10 relative flex items-center w-full z-10"><i id="car3" class="fa-solid fa-space-shuttle fa-rotate-90 text-4xl text-green-500 car-icon absolute top-1/2" style="left: 0%;"></i></div>
+                <div class="track-lane h-10 relative flex items-center w-full z-10"><i id="car4" class="fa-solid fa-truck-pickup text-4xl text-yellow-500 car-icon absolute top-1/2" style="left: 0%;"></i></div>
+                <div class="track-lane h-10 relative flex items-center w-full z-10"><i id="car5" class="fa-solid fa-rocket fa-rotate-90 text-4xl text-purple-500 car-icon absolute top-1/2" style="left: 0%;"></i></div>
 
-                <div class="absolute left-0 right-0 top-0 bottom-0 pointer-events-none">
+                <div class="absolute left-0 right-0 top-0 bottom-0 pointer-events-none z-20">
                     <div class="absolute left-[33.33%] h-full flex flex-col justify-start">
                         <div class="milestone-label border-yellow-500/90 mt-[-15px]">40</div>
                     </div>
@@ -324,7 +327,6 @@
             <div class="flex-1 bg-slate-950 p-10 relative flex flex-col items-center justify-center min-h-[500px]" id="playArea">
                 <div id="cardSelectionView" class="w-full flex flex-col items-center justify-center hidden">
                     <h2 class="text-3xl text-slate-200 font-black mb-10 tracking-[0.4em] uppercase border-b-4 border-blue-600/50 pb-4 text-center">문항 선택</h2>
-                    
                     <div class="flex flex-row gap-6 md:gap-10 justify-center w-full max-w-4xl px-4 mb-4">
                         <div onclick="selectCard('green')" class="flex-1 difficulty-btn bg-gradient-to-br from-emerald-600 to-green-800 border-emerald-400/40 text-white shadow-xl">
                             <span class="text-4xl font-black">초급</span>
@@ -372,8 +374,8 @@
         </div>
     </div>
 
-    <div id="endScreen" class="fixed inset-0 z-[100] bg-slate-950/98 hidden flex flex-col items-center justify-center backdrop-blur-3xl text-center text-white p-10 overflow-y-auto">
-        <div id="fireworksContainer" class="absolute inset-0 pointer-events-none"></div>
+    <div id="endScreen" class="fixed inset-0 z-[100] bg-slate-950/98 hidden flex-col items-center justify-center backdrop-blur-3xl text-center text-white p-10 overflow-y-auto">
+        <div id="fireworksContainer" class="absolute inset-0 pointer-events-none z-0"></div>
 
         <div class="relative z-10 mb-8 flex flex-col items-center">
             <h2 class="text-4xl race-font font-bold text-slate-400 tracking-[0.5em] mb-4 uppercase">RACE FINISHED</h2>
@@ -435,7 +437,7 @@
         
         let bgm = document.getElementById('racingBgm');
         let fanfare = document.getElementById('fanfareSfx');
-        let isSoundOn = false; // 기본으로 꺼둠 (관리자만 통제)
+        let isSoundOn = false; 
         let hasCelebrated = false; 
 
         const teamColors = {
@@ -455,7 +457,6 @@
             setTimeout(() => t.classList.add('hidden'), 3000);
         };
 
-        // 관리자 전용 BGM 컨트롤
         window.toggleAdminSound = () => {
             isSoundOn = !isSoundOn;
             if(isSoundOn) { 
@@ -494,7 +495,6 @@
                                 if(document.getElementById('myInfoName')) document.getElementById('myInfoName').innerText = myData.nickname;
                             }
                             if(playersMap[userId].team !== myData.team) {
-                                // 관리자가 팀을 변경한 경우 로컬 데이터 동기화
                                 myData.team = playersMap[userId].team;
                                 if(document.getElementById('myInfoTeamBadge') && myData.team) {
                                     document.getElementById('myInfoTeamBadge').innerText = teamColors[myData.team].name;
@@ -541,7 +541,6 @@
             myData.nickname = nn;
             myData.solvedG = 0; myData.solvedY = 0; myData.solvedR = 0;
             try {
-                // 참가자 입장 시 BGM을 강제로 틀지 않음
                 await setDoc(myDocRef, myData);
                 document.getElementById('lobbyScreen').classList.add('hidden');
                 document.getElementById('gameScreen').classList.add('active');
@@ -583,7 +582,6 @@
             showToast("데이터 초기화 완료");
         };
 
-        // 닉네임 클릭 시 팀을 이동시키는 기능
         window.adminChangeTeam = async (uid, currentTeam, pName) => {
             const newTeam = prompt(`[${pName}] 참가자를 이동시킬 차량 번호를 입력하세요.\n(1: 스피드스터, 2: 저거너트, 3: 호버크래프트, 4: 솔라버기, 5: 인터셉터)\n현재 팀: ${currentTeam}`, currentTeam);
             const nT = parseInt(newTeam);
@@ -603,7 +601,6 @@
             }
         };
 
-        // 관리자 화면 참가자 명단 - 자동차별 그룹화 렌더링
         function updateAdminPlayerList() {
             const list = document.getElementById('adminPlayerList');
             let html = '';
@@ -780,12 +777,29 @@
                 rankList.appendChild(div);
             });
 
-            // 관리자 권한이 있는 기기에서만 BGM 제어 및 빵빠레 재생
-            if(myData.isAdmin) {
-                bgm.pause();
-                if(isSoundOn) fanfare.play().catch(()=>{});
+            // 음악 및 폭죽 재생 (중복 실행 방지)
+            if(!hasCelebrated) {
+                hasCelebrated = true;
+                if(myData.isAdmin) {
+                    bgm.pause();
+                    if(isSoundOn) fanfare.play().catch(()=>{});
+                }
+                
+                if(window.confetti) {
+                    var duration = 3 * 1000;
+                    var animationEnd = Date.now() + duration;
+                    var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 999 };
+                    function randomInRange(min, max) { return Math.random() * (max - min) + min; }
+                    var interval = setInterval(function() {
+                        var timeLeft = animationEnd - Date.now();
+                        if (timeLeft <= 0) return clearInterval(interval);
+                        var particleCount = 50 * (timeLeft / duration);
+                        confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+                        confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+                    }, 250);
+                }
+                createCelebration();
             }
-            createCelebration();
         }
 
         function handleGameStateUpdate(data) {
@@ -805,22 +819,34 @@
                 hasCelebrated = false;
                 document.getElementById('waitStartOverlay').classList.add('hidden');
                 if(data.m40 === myData.team && !mgCleared) showMinigame();
+                
                 const myDistance = data.distances[myData.team] || 0;
                 const showPenaltyUI = (data.m80 === myData.team && myDistance >= 80);
-                document.getElementById('playArea').className = showPenaltyUI ? "flex-1 bg-slate-950 p-8 relative overflow-hidden flex flex-col items-center justify-center penalty-screen" : "flex-1 bg-slate-950 p-8 relative overflow-hidden flex flex-col items-center justify-center";
+                
+                document.getElementById('playArea').className = showPenaltyUI ? "flex-1 bg-slate-950 p-10 relative overflow-hidden flex flex-col items-center justify-center penalty-screen" : "flex-1 bg-slate-950 p-10 relative overflow-hidden flex flex-col items-center justify-center";
                 document.getElementById('localPenaltyInfo').innerText = showPenaltyUI ? "엔진 출력 저하 페널티 발생!" : "엔진 상태 정상";
                 document.getElementById('localPenaltyInfo').className = showPenaltyUI ? "text-[11px] mt-4 py-3 px-4 bg-red-900/50 rounded-2xl border border-red-600 text-red-200 text-center font-black uppercase tracking-widest animate-pulse shrink-0" : "text-[11px] mt-4 py-3 px-4 bg-slate-800 rounded-2xl border border-slate-700 text-slate-500 text-center font-black uppercase tracking-widest shrink-0";
+                
                 if(oldStatus !== 'playing') { document.getElementById('cardSelectionView').classList.remove('hidden'); mgCleared = false; }
             } else if (data.status === 'waiting') {
                 hasCelebrated = false;
                 document.getElementById('waitStartOverlay').classList.remove('hidden');
                 document.getElementById('cardSelectionView').classList.add('hidden');
                 document.getElementById('problemSolvingView').classList.add('hidden');
-                document.getElementById('endScreen').classList.replace('flex', 'hidden');
+                
+                // 우승 화면 숨기기 확실히 처리
+                const endScreen = document.getElementById('endScreen');
+                endScreen.classList.remove('flex');
+                endScreen.classList.add('hidden');
+                
                 mgCleared = false;
             }
+            
+            // 승리 화면 전환 로직
             if(data.status === 'ended' && data.winner) {
-                document.getElementById('endScreen').classList.replace('hidden', 'flex');
+                const endScreen = document.getElementById('endScreen');
+                endScreen.classList.remove('hidden');
+                endScreen.classList.add('flex');
                 renderWinningScreen(data);
             }
         }
